@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Zenki_Zenkipay routes definition
+ *
+ * @category    Payments
+ * @package     Zenki_Zenkipay
+ * @author      Federico Balderas
+ * @copyright   Zenki (https://zenki.fi)
+ * @license     http://www.apache.org/licenses/LICENSE-2.0  Apache License Version 2.0
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="standard">
+        <route id="zenkipay" frontName="zenkipay">
+            <module name="Zenki_Zenkipay" />
+        </route>
+    </router>
+</config>
