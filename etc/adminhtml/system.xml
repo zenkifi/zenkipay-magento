@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Zenki_Zenkipay admin configuration
+ *
+ * @category    Payments
+ * @package     Zenki_Zenkipay
+ * @author      Federico Balderas
+ * @copyright   Zenki (https://zenki.fi)
+ * @license     http://www.apache.org/licenses/LICENSE-2.0  Apache License Version 2.0
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment">
+            <group id="zenki_zenkipay" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Zenkipay</label>
+                <comment>
+                    <![CDATA[<a href="https://portal-dev.zenki.fi" target="_blank">Need a key? Create your Zenkipay account here</a>]]>
+                </comment>
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="is_sandbox" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Test mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>                
+                <field id="title" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="0">
+                    <label>Title</label>
+                </field>                
+                <field id="sandbox_pk" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sandbox Zenkipay key</label>
+                    <depends>
+                        <field id="is_sandbox">1</field>
+                    </depends>
+                </field>          
+                <field id="live_pk" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Production Zenkipay key</label>
+                    <depends>
+                        <field id="is_sandbox">0</field>
+                    </depends>
+                </field>                                                                                                                        
+                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="29" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Pago aplicable para países</label>
+                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                </field>
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Pago para países específicos</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                </field>                
+                <field id="sort_order" translate="label" type="text" sortOrder="34" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Order</label>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

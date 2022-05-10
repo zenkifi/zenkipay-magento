@@ -1,0 +1,22 @@
+{
+    "name": "zenki/zenkipay-magento",
+    "description": "Zenkipay integration for Magento 2",
+    "type": "magento2-module",
+    "minimum-stability": "stable",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Zenki",
+            "homepage": "https://zenki.fi",
+            "email": "support@zenki.fi"
+        }
+    ],
+    "extra": {
+        "map": [
+            [
+                "*",
+                "Zenki/Zenkipay"
+            ]
+        ]
+    }
+}

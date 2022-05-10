@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Zenki_Zenkipay default configuration
+ *
+ * @category    Payments
+ * @package     Zenki_Zenkipay
+ * @author      Federico Balderas
+ * @copyright   Zenki (https://zenki.fi)
+ * @license     http://www.apache.org/licenses/LICENSE-2.0  Apache License Version 2.0
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <csp>
+            <mode>
+                <storefront>
+                    <report_only>0</report_only>
+                </storefront>
+                <admin>
+                    <report_only>0</report_only>
+                </admin>
+            </mode>
+        </csp>
+        <payment>
+            <zenki_zenkipay>
+                <active>0</active>
+                <is_sandbox>1</is_sandbox>
+                <model>Zenki\Zenkipay\Model\Zenkipay</model>                
+                <order_status>pending_payment</order_status>
+                <title>Zenkipay</title>                
+                <payment_action>order</payment_action>                
+                <allowspecific>0</allowspecific>                
+            </zenki_zenkipay>
+        </payment>
+    </default>
+</config>
