@@ -16,19 +16,12 @@ define(
         'Magento_Checkout/js/model/quote'
     ],
     function (Component, $, quote) {
-        'use strict';
+        // 'use strict';
 
+        var zenkipayOrderId = '333';
         var totals = null;
         var customerData = null;
         var callbackUrl = window.checkoutConfig.payment.zenkipay.cb_url;
-        // var cancelUrl = window.checkoutConfig.payment.zenkipay.cancel_url;      
-
-        $(function () {
-            console.log("ready!");
-            console.log('OpenPay', OpenPay);
-            console.log('Stripe', Stripe);
-            console.log('zenkiPay', zenkiPay);
-        });
 
         return Component.extend({
             defaults: {
@@ -47,9 +40,7 @@ define(
              * Prepare and process payment information
              */
             preparePayment: function () {
-                console.log('OpenPay2', OpenPay);
-                console.log('Stripe2', Stripe);
-                console.log('zenkiPay2', window.zenkiPay);
+                console.log('zenkiPay', zenkiPay);
 
                 totals = quote.totals._latestValue;
                 customerData = quote.billingAddress._latestValue;
@@ -60,7 +51,6 @@ define(
                 var country = typeof customerData.countryId !== 'undefined' && customerData.countryId.length !== 0 ? customerData.countryId : '';
                 var items = totals.items.map(item => ({
                     itemId: item.item_id,
-                    name: item.name,
                     quantity: item.qty,
                     price: item.price,
                     thumbnailUrl: ''
@@ -87,61 +77,41 @@ define(
                 console.log('#preparePayment', { purchaseOptions });
 
                 zenkiPay.openModal(purchaseOptions, this.handleZenkipayEvents);
-                // self.placeOrder();
-                // return;
-
-
-                // self.messageContainer.addErrorMessage({
-                //     message: response.data.description
-                // });
+                // const orderId = '1234567890';
+                // const details = {
+                //     postMsgType: 'done',
+                //     isComplete: true
+                // };
+                // this.handleZenkipayEvents(null, orderId, details);
             },
-
             handleZenkipayEvents: function (error, data, details) {
-                this.messageContainer.clear();
                 console.log('handleZenkipayEvents', { error, data, details })
-                // var storeOrderId = "1";
+                this.messageContainer.clear();
 
-                // const events = {
-                //     'done': (data) => {
-                //         data.complete = '1';
-                //         this.sendPaymentRequestResponse(data);
-                //     },
-                //     'cancel': (data) => {
-                //         // setTimeout(this.redirectTo, 1000, cancelUrl);
-                //         this.messageContainer.addErrorMessage({
-                //             message: response.data.description
-                //         });
-                //     }
-                // };
-
-                // const dataRequest = {
-                //     order_id: storeOrderId,
-                //     complete: ''
-                // };
-
-                // if (error && error.postMsgType && error.postMsgType === 'error') {
-                //     dataRequest.complete = '0'
-                //     this.sendPaymentRequestResponse(dataRequest);
-                // } else if (details && details.postMsgType && events[details.postMsgType]) {
-                //     events[details.postMsgType](dataRequest);
-                // }
-            },
-
-            sendPaymentRequestResponse: function (data) {
-                $.post(callbackUrl, data).success((result) => {
-                    const response = JSON.parse(result);
-                    console.log('sendPaymentRequestResponse', response);
-                    // const redirectUrl = response.redirect_url;
-                    // setTimeout(this.redirectTo, 1000, redirectUrl);
-
+                if (!error && details.postMsgType === 'done') {
+                    zenkipayOrderId = data;
                     this.placeOrder();
                     return;
-                });
-            },
+                }
 
-            redirectTo: function (url) {
-                location.href = url;
-            }
+                if (error) {
+                    this.messageContainer.addErrorMessage({
+                        message: 'Ha ocurrido un error inesperado.'
+                    });
+                    return;
+                }
+            },
+            /**
+             * @override
+             */
+            getData: function () {
+                return {
+                    'method': "zenki_zenkipay",
+                    'additional_data': {
+                        'zenkipay_order_id': zenkipayOrderId
+                    }
+                };
+            },
         });
     }
 );

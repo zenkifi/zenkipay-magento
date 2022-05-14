@@ -1,3 +1,953 @@
-/*! For license information please see zenkipay.js.LICENSE.txt */
-!function (e, t) { "object" == typeof exports && "object" == typeof module ? module.exports = t() : "function" == typeof define && define.amd ? define("zenkiPay", [], t) : "object" == typeof exports ? exports.zenkiPay = t() : e.zenkiPay = t() }(this, (() => (() => { "use strict"; var e = { 888: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.BRIDGE_WALLET_CONNECT = t.COUNTRY_API = t.WEB_SOCKET_URL = t.API_URL = t.PUBLIC_URL = t.BASE_URL = t.ZENKIPAY_URL = t.ZENKIPAY_ASSETS_URL = t.RESOURCES_URL = t.SUFFIX_ENV_SCRIPT = void 0, t.SUFFIX_ENV_SCRIPT = "", t.RESOURCES_URL = "https://dev-resources.zenki.fi/", t.ZENKIPAY_ASSETS_URL = `${t.RESOURCES_URL}zenkipay/script/assets/`, t.ZENKIPAY_URL = "https://payments-dev.zenki.fi/#/", t.BASE_URL = "https://dev-gateway.zenki.fi/", t.PUBLIC_URL = `${t.BASE_URL}public/`, t.API_URL = `${t.BASE_URL}`, t.WEB_SOCKET_URL = `${t.BASE_URL}pbw/notifier`, t.COUNTRY_API = "https://ipapi.co/", t.BRIDGE_WALLET_CONNECT = "https://bridge.walletconnect.org" }, 465: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), (0, n(655).__exportStar)(n(888), t) }, 179: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), (0, n(655).__exportStar)(n(61), t) }, 281: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }); const r = n(655); (0, r.__exportStar)(n(836), t), (0, r.__exportStar)(n(582), t), (0, r.__exportStar)(n(369), t) }, 892: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }) }, 836: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), (0, n(655).__exportStar)(n(892), t) }, 588: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.useHttpAction = void 0; const r = n(655), o = n(465), i = n(369); t.useHttpAction = function (e, t = o.API_URL) { const n = (0, i.useHttpService)(t); function a(t = {}) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { const { token_type: r, access_token: o } = yield n.post("public/v1/merchants/plugin/token", e, { headers: { "Content-Type": "text/plain" } }); return t.Authorization = `${r} ${o}`, t })) } return { get(e, t = {}) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { return t.headers = yield a(null == t ? void 0 : t.headers), n.get(e, t) })) }, post(e, t, o = {}) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { return o.headers = yield a(null == o ? void 0 : o.headers), n.post(e, t, o) })) }, put(e, t, o = {}) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { return o.headers = yield a(null == o ? void 0 : o.headers), n.put(e, t, o) })) }, patch(e, t, o = {}) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { return o.headers = yield a(null == o ? void 0 : o.headers), n.patch(e, t, o) })) }, delete(e, t = {}) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { return t.headers = yield a(null == t ? void 0 : t.headers), n.delete(e, t) })) } } } }, 582: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }); const r = n(655); (0, r.__exportStar)(n(588), t), (0, r.__exportStar)(n(849), t) }, 849: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }) }, 674: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.useHttpService = void 0; const r = n(655), o = n(465), i = n(805); t.useHttpService = function (e = o.API_URL) { function t(t, n, o) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { t = `${e}${t}`; let r = null, a = null; o && ((null == o ? void 0 : o.body) && (r = (0, i.json2String)(o.body)), (null == o ? void 0 : o.headers) && (a = o.headers)); const l = Object.assign(Object.assign({ method: n }, r && { body: r }), a && { headers: a }); return (yield fetch(t, l)).json() })) } return { get(e, n) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { return t(e, "GET", n) })) }, post(e, n, o) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { const r = Object.assign(Object.assign({}, o), { body: n }); return t(e, "POST", r) })) }, put(e, n, o) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { const r = Object.assign(Object.assign({}, o), { body: n }); return t(e, "PUT", r) })) }, patch(e, n, o) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { const r = Object.assign(Object.assign({}, o), { body: n }); return t(e, "PATCH", r) })) }, delete(e, n) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { return t(e, "DELETE", n) })) } } } }, 369: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), (0, n(655).__exportStar)(n(674), t) }, 922: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }); const r = n(655); (0, r.__exportStar)(n(552), t), (0, r.__exportStar)(n(354), t), (0, r.__exportStar)(n(837), t) }, 552: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.getQueryParams = void 0, t.getQueryParams = function (e) { const t = {}; if (!e) return t; const n = e.split(/[;&]/); for (let e = 0; e < n.length; e++) { const r = n[e].split("="); if (!r || 2 != r.length) continue; const o = decodeURI(r[0]); let i = decodeURI(r[1]); i = i.replace(/\+/g, " "), t[o] = i } return t } }, 354: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.setShape2Element = void 0, t.setShape2Element = function (e, t) { switch (t) { case "pill": e.style.borderRadius = "64px"; break; case "square": e.style.borderRadius = "0"; break; default: e.style.borderRadius = "8px" }return e } }, 837: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.getZenkipayKey = void 0; const r = n(552); function o(e) { var t; const n = null === (t = null == e ? void 0 : e.src) || void 0 === t ? void 0 : t.replace(/^[^?]+\??/, ""), { zenkipayKey: o } = (0, r.getQueryParams)(n); return o } t.getZenkipayKey = function (e) { return function () { const e = null === document || void 0 === document ? void 0 : document.currentScript; return e ? o(e) : void 0 }() || function (e) { const t = `script[src*="${e ? `zenkipay.${e}.js` : "zenkipay.js"}?zenkipayKey="]`, n = document.querySelector(t); return n ? o(n) : void 0 }(e) } }, 61: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.POST_MSG_TYPE = void 0; const r = n(655); var o = n(984); Object.defineProperty(t, "POST_MSG_TYPE", { enumerable: !0, get: function () { return o.POST_MSG_TYPE } }), (0, r.__exportStar)(n(794), t), (0, r.__exportStar)(n(220), t) }, 794: (e, t, n) => { var r; Object.defineProperty(t, "__esModule", { value: !0 }), t.openModal = t.button = void 0; const o = n(655), i = n(465), a = n(984), l = n(922), c = n(995); r = function (e, t, n) { return { button: function (e, t, i) { return (0, o.__awaiter)(this, void 0, void 0, (function* () { if ((null == t ? void 0 : t.zenkipayKey) || (t.zenkipayKey = (0, l.getZenkipayKey)(n)), !(null == t ? void 0 : t.zenkipayKey)) { const e = new Error("Zenkipay key is undefined"); if (i) return i(e, null, { postMsgType: a.POST_MSG_TYPE.ERROR, isCompleted: !0 }); throw e } yield (0, c.createButton)(e, t, (() => r(t, i)), i) })) }, openModal: r }; function r(r, i) { return (0, o.__awaiter)(this, void 0, void 0, (function* () { let o = null == r ? void 0 : r.zenkipayKey; if (o || (o = (0, l.getZenkipayKey)(n)), !o) { const e = new Error("Zenkipay key is undefined"); if (i) return i(e, null, { postMsgType: a.POST_MSG_TYPE.ERROR, isCompleted: !0 }); throw e } try { const n = yield (0, c.getZenkipayUrl)(o, e, t, r.purchaseData); yield (0, c.createModal)(t, n, r, i) } catch (e) { if (i) return i(e, null, { postMsgType: a.POST_MSG_TYPE.ERROR, isCompleted: !0 }); throw e } })) } }(i.API_URL, i.ZENKIPAY_URL, i.SUFFIX_ENV_SCRIPT), t.button = r.button, t.openModal = r.openModal, window.zenkiPay = { button: t.button, openModal: t.openModal } }, 220: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }) }, 290: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.createButton = void 0; const r = n(655), o = n(465), i = n(922); function a(e, t) { var n, r, o, a; switch ("dark" === (null === (n = null == t ? void 0 : t.style) || void 0 === n ? void 0 : n.theme) ? (e.style.backgroundColor = "#000", e.style.borderColor = "#e2e2e2", e.style.borderStyle = "solid", e.style.borderWidth = "1px") : (e.style.backgroundColor = "#fff", e.style.borderColor = "#e2e2e2", e.style.borderStyle = "solid", e.style.borderWidth = "1px"), null === (r = null == t ? void 0 : t.style) || void 0 === r ? void 0 : r.size) { case "sm": e.style.width = "130px", e.style.height = "25px"; break; case "lg": e.style.width = "300px", e.style.height = "50px"; break; default: e.style.width = "196px", e.style.height = "38px" }return "block" === (null === (o = null == t ? void 0 : t.style) || void 0 === o ? void 0 : o.expand) && (e.style.width = "100%"), e.style.cursor = "pointer", (0, i.setShape2Element)(e, null === (a = null == t ? void 0 : t.style) || void 0 === a ? void 0 : a.shape) } t.createButton = function (e, t, n, i) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { const l = function (e) { if (!e) throw new Error('"containerId" is undefined'); const t = document.getElementById(e); if (!t) throw new Error(`Container with id '${e}' not found`); return t }(e); let c = document.createElement("button"); c.id = "pay-with-zenkipay", l.appendChild(c); const u = function (e, t) { var n; const r = document.createElement("img"); return "dark" === (null === (n = null == t ? void 0 : t.style) || void 0 === n ? void 0 : n.theme) ? r.src = `${o.ZENKIPAY_ASSETS_URL}images/zenkipay-dark.svg` : r.src = `${o.ZENKIPAY_ASSETS_URL}images/zenkipay-light.svg`, e.appendChild(r), r }(c, t); return function (e, t) { var n; switch (null === (n = null == t ? void 0 : t.style) || void 0 === n ? void 0 : n.size) { case "sm": e.style.height = "22px"; break; case "lg": e.style.height = "46px"; break; default: e.style.height = "34px" } }(u, t), c = a(c, t), function (e, t, n, o) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { return new Promise((i => { e.addEventListener("click", (() => (0, r.__awaiter)(this, void 0, void 0, (function* () { var r; "dark" === (null === (r = null == t ? void 0 : t.style) || void 0 === r ? void 0 : r.theme) ? (e.style.backgroundColor = "#060606", e.style.borderColor = "#e2e2e2") : (e.style.backgroundColor = "#f8f8f8", e.style.borderColor = "#e2e2e2"), e.style.cursor = "not-allowed", e.disabled = !0, yield n(o), a(e, t), e.disabled = !1, i(e) })))) })) })) }(c, t, n, i) })) } }, 995: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }); const r = n(655); (0, r.__exportStar)(n(290), t), (0, r.__exportStar)(n(314), t), (0, r.__exportStar)(n(248), t), (0, r.__exportStar)(n(912), t) }, 620: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.IFRAME_ID = t.IFRAME_CONTAINER_ID = t.CLOSE_BTN_ID = t.CLOSE_BTN_CONTAINER_ID = t.MODAL_CONTAINER_ID = t.ROOT_CONTAINER_ID = void 0, t.ROOT_CONTAINER_ID = "pbw-zenkipay-root-container", t.MODAL_CONTAINER_ID = "pbw-zenkipay-modal-container", t.CLOSE_BTN_CONTAINER_ID = "pbw-zenkipay-close-button-container", t.CLOSE_BTN_ID = "pbw-zenkipay-close-button", t.IFRAME_CONTAINER_ID = "pbw-zenkipay-iframe-container", t.IFRAME_ID = "pbw-zenkipay-iframe" }, 314: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), (0, n(655).__exportStar)(n(847), t) }, 847: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.createModal = void 0; const r = n(655), o = n(984), i = n(242); t.createModal = function (e, t, n, a) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { return new Promise((r => { const l = (0, i.createRootContainer)(), c = (0, i.createModalContainer)(l), u = (0, i.createCloseButton)(c, n); function s({ data: t, origin: n }) { if (null == e ? void 0 : e.includes(n)) switch (t.type) { case o.POST_MSG_TYPE.DONE: a && a(null, t.data, { postMsgType: o.POST_MSG_TYPE.DONE, isCompleted: !1 }), d(); break; case o.POST_MSG_TYPE.CANCEL: _(); break; case o.POST_MSG_TYPE.CLOSE: a && a(null, t.data, { postMsgType: o.POST_MSG_TYPE.CLOSE, isCompleted: !0 }), p(); break; case o.POST_MSG_TYPE.ERROR: a && a(t.data, null, { postMsgType: o.POST_MSG_TYPE.ERROR, isCompleted: !0 }), p(); break; case o.POST_MSG_TYPE.HIDE_CLOSE_BTN: d() } } function d() { u.removeEventListener("click", _); const e = u.parentElement; if (e) { const t = e.parentElement; e.removeChild(u), t && t.removeChild(e) } else u.style.display = "none" } function _() { a && a(null, null, { postMsgType: o.POST_MSG_TYPE.CANCEL, isCompleted: !0 }), p() } function p() { u.removeEventListener("click", _), window.removeEventListener("message", s), document.body.removeChild(l), r(l) } (0, i.createIFrame)(c, t, n), window.addEventListener("message", s), u.addEventListener("click", _) })) })) } }, 900: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.createCloseButton = void 0; const r = n(465), o = n(922), i = n(620); t.createCloseButton = function (e, t) { const n = function (e) { let t = document.createElement("div"); return t = function (e) { return e.style.position = "relative", e }(t), t.id = i.CLOSE_BTN_CONTAINER_ID, e.appendChild(t), t }(e); return function (e, t) { let n = document.createElement("button"); return n = function (e, t) { var n; return e.style.padding = "8px", e.style.position = "absolute", e.style.backgroundColor = "#efefef", e.style.boxShadow = "-1px 1px 4px 1px rgba(0, 0, 0, 0.25)", e.style.appearance = "none", e.style.cursor = "pointer", e.style.borderWidth = "0", e.style.height = "40px", e.style.width = "40px", e.style.right = "-16px", e.style.top = "-16px", (0, o.setShape2Element)(e, null === (n = null == t ? void 0 : t.style) || void 0 === n ? void 0 : n.shape) }(n, t), n.id = i.CLOSE_BTN_ID, function (e) { const t = document.createElement("img"); t.src = `${r.ZENKIPAY_ASSETS_URL}icons/icon-close-light.svg`, e.appendChild(t) }(n), e.appendChild(n), n }(n, t) } }, 98: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.createIFrame = void 0; const r = n(922), o = n(620); t.createIFrame = function (e, t, n) { const i = function (e) { let t = document.createElement("div"); return t = function (e) { return e.style.height = "100%", e }(t), t.id = o.IFRAME_CONTAINER_ID, e.appendChild(t), t }(e); return function (e, t, n) { let i = document.createElement("iframe"); return window.origin && "null" !== window.origin && (i.name = window.origin), i = function (e, t) { var n; return e.style.width = "100%", e.style.height = "100%", e.style.borderWidth = "0", (0, r.setShape2Element)(e, null === (n = null == t ? void 0 : t.style) || void 0 === n ? void 0 : n.shape) }(i, n), i.src = t, i.id = o.IFRAME_ID, e.appendChild(i), i }(i, t, n) } }, 242: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }); const r = n(655); (0, r.__exportStar)(n(900), t), (0, r.__exportStar)(n(98), t), (0, r.__exportStar)(n(801), t), (0, r.__exportStar)(n(453), t) }, 801: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.createModalContainer = void 0; const r = n(620); t.createModalContainer = function (e) { let t = document.createElement("div"); return t = function (e) { const t = "calc(100vw - 48px)", n = "600px"; return window.innerWidth <= 624 ? e.style.maxWidth = t : e.style.maxWidth = n, e.style.width = "100%", e.style.height = "750px", e.style.maxHeight = "calc(100vh - 48px)", e.style.zIndex = "1000000", window.matchMedia("(max-width: 624px)").addEventListener("change", (r => { r.matches ? e.style.maxWidth = t : e.style.maxWidth = n })), e }(t), t.id = r.MODAL_CONTAINER_ID, e.appendChild(t), t } }, 453: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.createRootContainer = void 0; const r = n(620); t.createRootContainer = function () { let e = document.getElementById(r.ROOT_CONTAINER_ID); return e && document.body.removeChild(e), e = document.createElement("div"), e = function (e) { return e.style.top = "0", e.style.left = "0", e.style.width = "100%", e.style.height = "100vh", e.style.position = "fixed", e.style.alignItems = "center", e.style.flexDirection = "column", e.style.justifyContent = "center", e.style.transition = "opacity 250ms ease-in-out", e.style.backgroundColor = "rgba(0, 0, 0, 0.5)", e.style.pointerEvents = "auto", e.style.visibility = "visible", e.style.zIndex = "999999", e.style.display = "flex", e.style.opacity = "1", e }(e), e.id = r.ROOT_CONTAINER_ID, document.body.appendChild(e), e } }, 248: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }) }, 912: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.getZenkipayUrl = void 0; const r = n(655), o = n(546), i = n(549); t.getZenkipayUrl = function (e, t, n, a) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { const r = (0, o.useCountryService)(), l = yield r.getCountry(), c = (0, i.useMerchantService)(e, t), u = yield c.getMerchant(), s = (0, o.useOrderService)(e, t), { orderId: d } = yield s.postPreOrder(u, a, l); return `${n}?zenkipayKey=${e}&orderId=${d}` })) } }, 873: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.useCountryService = void 0; const r = n(655), o = n(465), i = n(281); t.useCountryService = function (e = o.COUNTRY_API) { const t = (0, i.useHttpService)(e); return { getCountry() { return (0, r.__awaiter)(this, void 0, void 0, (function* () { const { country_code: e } = yield t.get("json"); return e })) } } } }, 546: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }); const r = n(655); (0, r.__exportStar)(n(873), t), (0, r.__exportStar)(n(873), t), (0, r.__exportStar)(n(138), t) }, 549: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.useMerchantService = void 0; const r = n(655), o = n(465), i = n(281); t.useMerchantService = function (e, t = o.API_URL) { const n = (0, i.useHttpAction)(e, t); return { getMerchant() { return (0, r.__awaiter)(this, void 0, void 0, (function* () { return n.post("v1/merchants/plugin", e, { headers: { "Content-Type": "text/plain" } }) })) } } } }, 138: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.useOrderService = void 0; const r = n(655), o = n(465), i = n(281); t.useOrderService = function (e, t = o.API_URL) { const n = (0, i.useHttpAction)(e, t); return { postPreOrder(e, t, o) { return (0, r.__awaiter)(this, void 0, void 0, (function* () { const r = { orderPlacedAt: new Date, merchantId: e.merchantId, merchantName: e.merchantName, merchantUnitId: e.merchantUnitId, country: o || t.country || "", totalAmount: t.amount, currency: t.currency, items: t.items }; return n.post("v1/orders/pre", r, { headers: { "Content-Type": "application/json" } }) })) } } } }, 446: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.ETH_UNIT_MAP = void 0, t.ETH_UNIT_MAP = { noether: "0", wei: "1", kwei: "1000", Kwei: "1000", babbage: "1000", femtoether: "1000", mwei: "1000000", Mwei: "1000000", lovelace: "1000000", picoether: "1000000", gwei: "1000000000", Gwei: "1000000000", shannon: "1000000000", nanoether: "1000000000", nano: "1000000000", szabo: "1000000000000", microether: "1000000000000", micro: "1000000000000", finney: "1000000000000000", milliether: "1000000000000000", milli: "1000000000000000", ether: "1000000000000000000", kether: "1000000000000000000000", grand: "1000000000000000000000", mether: "1000000000000000000000000", gether: "1000000000000000000000000000", tether: "1000000000000000000000000000000" } }, 984: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }); const r = n(655); (0, r.__exportStar)(n(446), t), (0, r.__exportStar)(n(866), t), (0, r.__exportStar)(n(819), t), (0, r.__exportStar)(n(473), t) }, 866: (e, t) => { var n; Object.defineProperty(t, "__esModule", { value: !0 }), t.POST_MSG_TYPE = void 0, (n = t.POST_MSG_TYPE || (t.POST_MSG_TYPE = {})).CANCEL = "cancel", n.DONE = "done", n.CLOSE = "close", n.ERROR = "error", n.HIDE_CLOSE_BTN = "hideCloseBtn" }, 819: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.SUPPORTED_WALLETS = void 0, t.SUPPORTED_WALLETS = [{ name: "WalletConnect", legend: "Scan with WalletConnect", logo: "assets/global/img/w-connect.png" }, { name: "MetaMask", legend: "Connect to Metamask Wallet", logo: "assets/global/img/metamask.png" }, { name: "WalletConnect", legend: "Scan with WalletConnect", logo: "assets/global/img/w-connect.png" }, { name: "WalletConnect", legend: "Scan with WalletConnect", logo: "assets/global/img/w-connect.png" }, { name: "WalletConnect", legend: "Scan with WalletConnect", logo: "assets/global/img/w-connect.png" }, { name: "WalletConnect", legend: "Scan with WalletConnect", logo: "assets/global/img/w-connect.png" }, { name: "WalletConnect", legend: "Scan with WalletConnect", logo: "assets/global/img/w-connect.png" }, { name: "WalletConnect", legend: "Scan with WalletConnect", logo: "assets/global/img/w-connect.png" }] }, 473: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.SECOND_IN_MILLISECONDS = t.MINUTE_IN_SECONDS = t.HOUR_IN_MINUTES = t.HOUR_IN_SECONDS = void 0, t.HOUR_IN_SECONDS = 3600, t.HOUR_IN_MINUTES = 60, t.MINUTE_IN_SECONDS = 60, t.SECOND_IN_MILLISECONDS = 1e3 }, 805: (e, t, n) => { Object.defineProperty(t, "__esModule", { value: !0 }), (0, n(655).__exportStar)(n(397), t) }, 397: (e, t) => { Object.defineProperty(t, "__esModule", { value: !0 }), t.json2String = t.string2Json = t.clone = t.isEqual = void 0, t.isEqual = function (e, t, n = 7) { return function e(t, r, o) { if (o > n) throw new Error(`Comparison between objects exceeds deep level limit of ${n}`); if (!t && r || t && !r) return !1; if (!t && !r) return !0; if (typeof t != typeof r) return !1; if ("object" != typeof t) return t === r; if (Array.isArray(t) && Array.isArray(r)) { for (let n = 0; n < t.length; n++)if (!e(t[n], r[n], o + 1)) return !1 } else if (Array.isArray(t) && !Array.isArray(r) || !Array.isArray(t) && Array.isArray(r)) return !1; const i = Object.entries(t), a = Object.entries(r); if (i.length !== a.length) return !1; for (let t = 0; t < i.length; t++) { const [n, r] = i[t], l = a.findIndex((([e]) => e === n)); if (l < 0) return !1; const [, c] = a.splice(l, 1)[0]; if (!e(r, c, o + 1)) return !1 } return !0 }(e, t, 0) }, t.clone = function (e) { try { return JSON.parse(JSON.stringify(e)) } catch (t) { return e } }, t.string2Json = function (e) { try { return JSON.parse(e) } catch (t) { return e } }, t.json2String = function (e) { try { return "string" == typeof e ? e : JSON.stringify(e) } catch (t) { return e } } }, 655: (e, t, n) => { n.r(t), n.d(t, { __assign: () => i, __asyncDelegator: () => m, __asyncGenerator: () => O, __asyncValues: () => g, __await: () => S, __awaiter: () => s, __classPrivateFieldGet: () => T, __classPrivateFieldSet: () => I, __createBinding: () => _, __decorate: () => l, __exportStar: () => p, __extends: () => o, __generator: () => d, __importDefault: () => C, __importStar: () => P, __makeTemplateObject: () => E, __metadata: () => u, __param: () => c, __read: () => f, __rest: () => a, __spread: () => v, __spreadArray: () => b, __spreadArrays: () => h, __values: () => y }); var r = function (e, t) { return r = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function (e, t) { e.__proto__ = t } || function (e, t) { for (var n in t) Object.prototype.hasOwnProperty.call(t, n) && (e[n] = t[n]) }, r(e, t) }; function o(e, t) { if ("function" != typeof t && null !== t) throw new TypeError("Class extends value " + String(t) + " is not a constructor or null"); function n() { this.constructor = e } r(e, t), e.prototype = null === t ? Object.create(t) : (n.prototype = t.prototype, new n) } var i = function () { return i = Object.assign || function (e) { for (var t, n = 1, r = arguments.length; n < r; n++)for (var o in t = arguments[n]) Object.prototype.hasOwnProperty.call(t, o) && (e[o] = t[o]); return e }, i.apply(this, arguments) }; function a(e, t) { var n = {}; for (var r in e) Object.prototype.hasOwnProperty.call(e, r) && t.indexOf(r) < 0 && (n[r] = e[r]); if (null != e && "function" == typeof Object.getOwnPropertySymbols) { var o = 0; for (r = Object.getOwnPropertySymbols(e); o < r.length; o++)t.indexOf(r[o]) < 0 && Object.prototype.propertyIsEnumerable.call(e, r[o]) && (n[r[o]] = e[r[o]]) } return n } function l(e, t, n, r) { var o, i = arguments.length, a = i < 3 ? t : null === r ? r = Object.getOwnPropertyDescriptor(t, n) : r; if ("object" == typeof Reflect && "function" == typeof Reflect.decorate) a = Reflect.decorate(e, t, n, r); else for (var l = e.length - 1; l >= 0; l--)(o = e[l]) && (a = (i < 3 ? o(a) : i > 3 ? o(t, n, a) : o(t, n)) || a); return i > 3 && a && Object.defineProperty(t, n, a), a } function c(e, t) { return function (n, r) { t(n, r, e) } } function u(e, t) { if ("object" == typeof Reflect && "function" == typeof Reflect.metadata) return Reflect.metadata(e, t) } function s(e, t, n, r) { return new (n || (n = Promise))((function (o, i) { function a(e) { try { c(r.next(e)) } catch (e) { i(e) } } function l(e) { try { c(r.throw(e)) } catch (e) { i(e) } } function c(e) { var t; e.done ? o(e.value) : (t = e.value, t instanceof n ? t : new n((function (e) { e(t) }))).then(a, l) } c((r = r.apply(e, t || [])).next()) })) } function d(e, t) { var n, r, o, i, a = { label: 0, sent: function () { if (1 & o[0]) throw o[1]; return o[1] }, trys: [], ops: [] }; return i = { next: l(0), throw: l(1), return: l(2) }, "function" == typeof Symbol && (i[Symbol.iterator] = function () { return this }), i; function l(i) { return function (l) { return function (i) { if (n) throw new TypeError("Generator is already executing."); for (; a;)try { if (n = 1, r && (o = 2 & i[0] ? r.return : i[0] ? r.throw || ((o = r.return) && o.call(r), 0) : r.next) && !(o = o.call(r, i[1])).done) return o; switch (r = 0, o && (i = [2 & i[0], o.value]), i[0]) { case 0: case 1: o = i; break; case 4: return a.label++, { value: i[1], done: !1 }; case 5: a.label++, r = i[1], i = [0]; continue; case 7: i = a.ops.pop(), a.trys.pop(); continue; default: if (!((o = (o = a.trys).length > 0 && o[o.length - 1]) || 6 !== i[0] && 2 !== i[0])) { a = 0; continue } if (3 === i[0] && (!o || i[1] > o[0] && i[1] < o[3])) { a.label = i[1]; break } if (6 === i[0] && a.label < o[1]) { a.label = o[1], o = i; break } if (o && a.label < o[2]) { a.label = o[2], a.ops.push(i); break } o[2] && a.ops.pop(), a.trys.pop(); continue }i = t.call(e, a) } catch (e) { i = [6, e], r = 0 } finally { n = o = 0 } if (5 & i[0]) throw i[1]; return { value: i[0] ? i[1] : void 0, done: !0 } }([i, l]) } } } var _ = Object.create ? function (e, t, n, r) { void 0 === r && (r = n), Object.defineProperty(e, r, { enumerable: !0, get: function () { return t[n] } }) } : function (e, t, n, r) { void 0 === r && (r = n), e[r] = t[n] }; function p(e, t) { for (var n in e) "default" === n || Object.prototype.hasOwnProperty.call(t, n) || _(t, e, n) } function y(e) { var t = "function" == typeof Symbol && Symbol.iterator, n = t && e[t], r = 0; if (n) return n.call(e); if (e && "number" == typeof e.length) return { next: function () { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e } } }; throw new TypeError(t ? "Object is not iterable." : "Symbol.iterator is not defined.") } function f(e, t) { var n = "function" == typeof Symbol && e[Symbol.iterator]; if (!n) return e; var r, o, i = n.call(e), a = []; try { for (; (void 0 === t || t-- > 0) && !(r = i.next()).done;)a.push(r.value) } catch (e) { o = { error: e } } finally { try { r && !r.done && (n = i.return) && n.call(i) } finally { if (o) throw o.error } } return a } function v() { for (var e = [], t = 0; t < arguments.length; t++)e = e.concat(f(arguments[t])); return e } function h() { for (var e = 0, t = 0, n = arguments.length; t < n; t++)e += arguments[t].length; var r = Array(e), o = 0; for (t = 0; t < n; t++)for (var i = arguments[t], a = 0, l = i.length; a < l; a++, o++)r[o] = i[a]; return r } function b(e, t, n) { if (n || 2 === arguments.length) for (var r, o = 0, i = t.length; o < i; o++)!r && o in t || (r || (r = Array.prototype.slice.call(t, 0, o)), r[o] = t[o]); return e.concat(r || Array.prototype.slice.call(t)) } function S(e) { return this instanceof S ? (this.v = e, this) : new S(e) } function O(e, t, n) { if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined."); var r, o = n.apply(e, t || []), i = []; return r = {}, a("next"), a("throw"), a("return"), r[Symbol.asyncIterator] = function () { return this }, r; function a(e) { o[e] && (r[e] = function (t) { return new Promise((function (n, r) { i.push([e, t, n, r]) > 1 || l(e, t) })) }) } function l(e, t) { try { (n = o[e](t)).value instanceof S ? Promise.resolve(n.value.v).then(c, u) : s(i[0][2], n) } catch (e) { s(i[0][3], e) } var n } function c(e) { l("next", e) } function u(e) { l("throw", e) } function s(e, t) { e(t), i.shift(), i.length && l(i[0][0], i[0][1]) } } function m(e) { var t, n; return t = {}, r("next"), r("throw", (function (e) { throw e })), r("return"), t[Symbol.iterator] = function () { return this }, t; function r(r, o) { t[r] = e[r] ? function (t) { return (n = !n) ? { value: S(e[r](t)), done: "return" === r } : o ? o(t) : t } : o } } function g(e) { if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined."); var t, n = e[Symbol.asyncIterator]; return n ? n.call(e) : (e = y(e), t = {}, r("next"), r("throw"), r("return"), t[Symbol.asyncIterator] = function () { return this }, t); function r(n) { t[n] = e[n] && function (t) { return new Promise((function (r, o) { !function (e, t, n, r) { Promise.resolve(r).then((function (t) { e({ value: t, done: n }) }), t) }(r, o, (t = e[n](t)).done, t.value) })) } } } function E(e, t) { return Object.defineProperty ? Object.defineProperty(e, "raw", { value: t }) : e.raw = t, e } var w = Object.create ? function (e, t) { Object.defineProperty(e, "default", { enumerable: !0, value: t }) } : function (e, t) { e.default = t }; function P(e) { if (e && e.__esModule) return e; var t = {}; if (null != e) for (var n in e) "default" !== n && Object.prototype.hasOwnProperty.call(e, n) && _(t, e, n); return w(t, e), t } function C(e) { return e && e.__esModule ? e : { default: e } } function T(e, t, n, r) { if ("a" === n && !r) throw new TypeError("Private accessor was defined without a getter"); if ("function" == typeof t ? e !== t || !r : !t.has(e)) throw new TypeError("Cannot read private member from an object whose class did not declare it"); return "m" === n ? r : "a" === n ? r.call(e) : r ? r.value : t.get(e) } function I(e, t, n, r, o) { if ("m" === r) throw new TypeError("Private method is not writable"); if ("a" === r && !o) throw new TypeError("Private accessor was defined without a setter"); if ("function" == typeof t ? e !== t || !o : !t.has(e)) throw new TypeError("Cannot write private member to an object whose class did not declare it"); return "a" === r ? o.call(e, n) : o ? o.value = n : t.set(e, n), n } } }, t = {}; function n(r) { var o = t[r]; if (void 0 !== o) return o.exports; var i = t[r] = { exports: {} }; return e[r](i, i.exports, n), i.exports } return n.d = (e, t) => { for (var r in t) n.o(t, r) && !n.o(e, r) && Object.defineProperty(e, r, { enumerable: !0, get: t[r] }) }, n.o = (e, t) => Object.prototype.hasOwnProperty.call(e, t), n.r = e => { "undefined" != typeof Symbol && Symbol.toStringTag && Object.defineProperty(e, Symbol.toStringTag, { value: "Module" }), Object.defineProperty(e, "__esModule", { value: !0 }) }, n(179) })()));
-//# sourceMappingURL=zenkipay.js.map
+'use strict';
+
+var zenkiPay = (function (baseApiUrl, baseZenkipayUrl, suffixEnvScript) {
+    //#region CONSTANTS
+
+    const COUNTRY_API = 'https://ipapi.co/';
+    const RESOURCES_URL = 'https://dev-resources.zenki.fi/';
+    const ZENKIPAY_ASSETS_URL = ''.concat(
+        RESOURCES_URL,
+        'zenkipay/script/assets/'
+    );
+
+    //#endregion CONSTANTS
+
+    //#region ELEMENT_IDS
+
+    const ROOT_CONTAINER_ID = 'pbw-zenkipay-root-container';
+    const MODAL_CONTAINER_ID = 'pbw-zenkipay-modal-container';
+    const CLOSE_BTN_CONTAINER_ID = 'pbw-zenkipay-close-button-container';
+    const CLOSE_BTN_ID = 'pbw-zenkipay-close-button';
+    const IFRAME_CONTAINER_ID = 'pbw-zenkipay-iframe-container';
+    const IFRAME_ID = 'pbw-zenkipay-iframe';
+
+    //#endregion ELEMENT_IDS
+
+    //#region MODELS
+
+    const POST_MSG_TYPE = {
+        CANCEL: 'cancel',
+        DONE: 'done',
+        CLOSE: 'close',
+        ERROR: 'error',
+        HIDE_CLOSE_BTN: 'hideCloseBtn',
+    };
+
+    //#endregion MODELS
+
+    return {
+        button,
+        openModal,
+    };
+
+    //#region MAIN
+
+    async function button(containerId, options, callback) {
+        if (!(options !== null && options !== void 0 && options.zenkipayKey)) {
+            options.zenkipayKey = getZenkipayKey(suffixEnvScript);
+        }
+
+        if (!(options !== null && options !== void 0 && options.zenkipayKey)) {
+            const error = new Error('Zenkipay key is undefined');
+
+            if (callback) {
+                return callback(error, null, {
+                    postMsgType: POST_MSG_TYPE.ERROR,
+                    isCompleted: true,
+                });
+            }
+
+            throw error;
+        }
+
+        await createButton(
+            containerId,
+            options,
+            () => openModal(options, callback),
+            callback
+        );
+    }
+
+    async function openModal(options, callback) {
+        let zenkipayKey =
+            options === null || options === void 0 ? void 0 : options.zenkipayKey;
+
+        if (!zenkipayKey) {
+            zenkipayKey = getZenkipayKey(suffixEnvScript);
+        }
+
+        if (!zenkipayKey) {
+            const error = new Error('Zenkipay key is undefined');
+
+            if (callback) {
+                return callback(error, null, {
+                    postMsgType: POST_MSG_TYPE.ERROR,
+                    isCompleted: true,
+                });
+            }
+
+            throw error;
+        }
+
+        try {
+            const zenkipayUrl = await getZenkipayUrl(
+                zenkipayKey,
+                baseApiUrl,
+                baseZenkipayUrl,
+                options.purchaseData
+            );
+            await createModal(baseZenkipayUrl, zenkipayUrl, options, callback);
+        } catch (error) {
+            if (callback) {
+                return callback(error, null, {
+                    postMsgType: POST_MSG_TYPE.ERROR,
+                    isCompleted: true,
+                });
+            }
+
+            throw error;
+        }
+    }
+
+    //#endregion MAIN
+
+    //#region FUNCTIONS
+
+    function json2String(input) {
+        try {
+            if (typeof input === 'string') return input;
+            return JSON.stringify(input);
+        } catch (_) {
+            return input;
+        }
+    }
+
+    function setShape2Element(element, shape) {
+        switch (shape) {
+            case 'pill': {
+                element.style.borderRadius = '64px';
+                break;
+            }
+
+            case 'square': {
+                element.style.borderRadius = '0';
+                break;
+            }
+
+            default: {
+                element.style.borderRadius = '8px';
+            }
+        }
+
+        return element;
+    }
+
+    //#region ZENKIPAY_KEY
+
+    function getZenkipayKey(suffixEnvScript) {
+        const zenkipayKey = getZenkipayKeyFromCurrentScript();
+        if (zenkipayKey) return zenkipayKey;
+        return getZenkipayKeyUsingSelector(suffixEnvScript);
+    }
+
+    function getZenkipayKeyFromCurrentScript() {
+        var _document;
+
+        const script =
+            (_document = document) === null || _document === void 0
+                ? void 0
+                : _document.currentScript;
+        if (script) return getZenkipayKeyFromScript(script);
+        return undefined;
+    }
+
+    function getZenkipayKeyUsingSelector(suffixEnvScript) {
+        const scriptName = suffixEnvScript
+            ? 'zenkipay.'.concat(suffixEnvScript, '.js')
+            : 'zenkipay.js';
+        const scriptSelector = 'script[src*="'.concat(
+            scriptName,
+            '?zenkipayKey="]'
+        );
+        const script = document.querySelector(scriptSelector);
+        if (script) return getZenkipayKeyFromScript(script);
+        return undefined;
+    }
+
+    function getZenkipayKeyFromScript(script) {
+        var _script$src;
+
+        const queryParams =
+            script === null || script === void 0
+                ? void 0
+                : (_script$src = script.src) === null || _script$src === void 0
+                    ? void 0
+                    : _script$src.replace(/^[^?]+\??/, '');
+        const { zenkipayKey } = getQueryParams(queryParams);
+        return zenkipayKey;
+    }
+
+    //#endregion ZENKIPAY_KEY
+
+    //#region QUERY_PARAMS
+
+    function getQueryParams(queryParams) {
+        const params = {};
+        if (!queryParams) return params;
+        const pairs = queryParams.split(/[;&]/);
+
+        for (let i = 0; i < pairs.length; i++) {
+            const keyVal = pairs[i].split('=');
+            if (!keyVal || keyVal.length != 2) continue;
+            const key = decodeURI(keyVal[0]);
+            let val = decodeURI(keyVal[1]);
+            val = val.replace(/\+/g, ' ');
+            params[key] = val;
+        }
+
+        return params;
+    }
+
+    //#endregion QUERY_PARAMS
+
+    //#endregion FUNCTIONS
+
+    //#region ORCHESTRATORS
+
+    function useHttpAction(zenkipayKey) {
+        let baseUrl =
+            arguments.length > 1 && arguments[1] !== undefined
+                ? arguments[1]
+                : baseApiUrl;
+        const httpService = useHttpService(baseUrl);
+
+        async function appendAuthorizationInHeaders() {
+            let headers =
+                arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+            const url = 'public/v1/merchants/plugin/token';
+            const options = {
+                headers: {
+                    'Content-Type': 'text/plain',
+                },
+            };
+            const { token_type, access_token } = await httpService.post(
+                url,
+                zenkipayKey,
+                options
+            );
+            headers['Authorization'] = ''
+                .concat(token_type, ' ')
+                .concat(access_token);
+            return headers;
+        }
+
+        return {
+            async get(url) {
+                let options =
+                    arguments.length > 1 && arguments[1] !== undefined
+                        ? arguments[1]
+                        : {};
+                options.headers = await appendAuthorizationInHeaders(
+                    options === null || options === void 0 ? void 0 : options.headers
+                );
+                return httpService.get(url, options);
+            },
+
+            async post(url, body) {
+                let options =
+                    arguments.length > 2 && arguments[2] !== undefined
+                        ? arguments[2]
+                        : {};
+                options.headers = await appendAuthorizationInHeaders(
+                    options === null || options === void 0 ? void 0 : options.headers
+                );
+                return httpService.post(url, body, options);
+            },
+
+            async put(url, body) {
+                let options =
+                    arguments.length > 2 && arguments[2] !== undefined
+                        ? arguments[2]
+                        : {};
+                options.headers = await appendAuthorizationInHeaders(
+                    options === null || options === void 0 ? void 0 : options.headers
+                );
+                return httpService.put(url, body, options);
+            },
+
+            async patch(url, body) {
+                let options =
+                    arguments.length > 2 && arguments[2] !== undefined
+                        ? arguments[2]
+                        : {};
+                options.headers = await appendAuthorizationInHeaders(
+                    options === null || options === void 0 ? void 0 : options.headers
+                );
+                return httpService.patch(url, body, options);
+            },
+
+            async delete(url) {
+                let options =
+                    arguments.length > 1 && arguments[1] !== undefined
+                        ? arguments[1]
+                        : {};
+                options.headers = await appendAuthorizationInHeaders(
+                    options === null || options === void 0 ? void 0 : options.headers
+                );
+                return httpService.delete(url, options);
+            },
+        };
+    }
+
+    //#region ZENKIPAY_URL_ACTION
+
+    async function getZenkipayUrl(
+        zenkipayKey,
+        baseApiUrl,
+        baseZenkipayUrl,
+        purchaseData
+    ) {
+        try {
+            const countryService = useCountryService();
+            const country = await countryService.getCountry();
+            const merchantService = useMerchantService(zenkipayKey, baseApiUrl);
+            const merchant = await merchantService.getMerchant();
+            const orderService = useOrderService(zenkipayKey, baseApiUrl);
+            const { orderId } = await orderService.postPreOrder(
+                merchant,
+                purchaseData,
+                country
+            );
+            return ''
+                .concat(baseZenkipayUrl, '?zenkipayKey=')
+                .concat(zenkipayKey, '&orderId=')
+                .concat(orderId);
+        } catch (error) {
+            return baseZenkipayUrl;
+        }
+    }
+
+    //#endregion ZENKIPAY_URL_ACTION
+
+    //#region BUTTON_ACTION
+
+    async function createButton(containerId, options, click, callback) {
+        const container = getContainer(containerId);
+        let button = document.createElement('button');
+        button.id = 'pay-with-zenkipay';
+        container.appendChild(button);
+        const zenkipayImg = createZenkipayImg(button, options);
+        setStyles2ZenkipayImg(zenkipayImg, options);
+        button = setStyles2Button(button, options);
+        return setEvents2Button(button, options, click, callback);
+    }
+
+    function getContainer(containerId) {
+        if (!containerId) {
+            throw new Error('"containerId" is undefined');
+        }
+
+        const container = document.getElementById(containerId);
+
+        if (!container) {
+            throw new Error("Container with id '".concat(containerId, "' not found"));
+        }
+
+        return container;
+    }
+
+    async function setEvents2Button(button, options, click, callback) {
+        return new Promise((resolve) => {
+            button.addEventListener('click', async () => {
+                var _options$style;
+
+                switch (
+                options === null || options === void 0
+                    ? void 0
+                    : (_options$style = options.style) === null ||
+                        _options$style === void 0
+                        ? void 0
+                        : _options$style.theme
+                ) {
+                    case 'dark': {
+                        button.style.backgroundColor = '#060606';
+                        button.style.borderColor = '#e2e2e2';
+                        break;
+                    }
+
+                    default: {
+                        button.style.backgroundColor = '#f8f8f8';
+                        button.style.borderColor = '#e2e2e2';
+                    }
+                }
+
+                button.style.cursor = 'not-allowed';
+                button.disabled = true;
+                await click(callback);
+                setStyles2Button(button, options);
+                button.disabled = false;
+                resolve(button);
+            });
+        });
+    }
+
+    function setStyles2Button(button, options) {
+        var _options$style2, _options$style3, _options$style4, _options$style5;
+
+        switch (
+        options === null || options === void 0
+            ? void 0
+            : (_options$style2 = options.style) === null ||
+                _options$style2 === void 0
+                ? void 0
+                : _options$style2.theme
+        ) {
+            case 'dark': {
+                button.style.backgroundColor = '#000';
+                button.style.borderColor = '#e2e2e2';
+                button.style.borderStyle = 'solid';
+                button.style.borderWidth = '1px';
+                break;
+            }
+
+            default: {
+                button.style.backgroundColor = '#fff';
+                button.style.borderColor = '#e2e2e2';
+                button.style.borderStyle = 'solid';
+                button.style.borderWidth = '1px';
+            }
+        }
+
+        switch (
+        options === null || options === void 0
+            ? void 0
+            : (_options$style3 = options.style) === null ||
+                _options$style3 === void 0
+                ? void 0
+                : _options$style3.size
+        ) {
+            case 'sm': {
+                button.style.width = '130px';
+                button.style.height = '25px';
+                break;
+            }
+
+            case 'lg': {
+                button.style.width = '300px';
+                button.style.height = '50px';
+                break;
+            }
+
+            default: {
+                button.style.width = '196px';
+                button.style.height = '38px';
+            }
+        }
+
+        switch (
+        options === null || options === void 0
+            ? void 0
+            : (_options$style4 = options.style) === null ||
+                _options$style4 === void 0
+                ? void 0
+                : _options$style4.expand
+        ) {
+            case 'block': {
+                button.style.width = '100%';
+                break;
+            }
+
+            default:
+        }
+
+        button.style.cursor = 'pointer';
+        return setShape2Element(
+            button,
+            options === null || options === void 0
+                ? void 0
+                : (_options$style5 = options.style) === null ||
+                    _options$style5 === void 0
+                    ? void 0
+                    : _options$style5.shape
+        );
+    }
+
+    function createZenkipayImg(parentContainer, options) {
+        var _options$style6;
+
+        const img = document.createElement('img');
+        img.style.verticalAlign = 'top';
+
+        switch (
+        options === null || options === void 0
+            ? void 0
+            : (_options$style6 = options.style) === null ||
+                _options$style6 === void 0
+                ? void 0
+                : _options$style6.theme
+        ) {
+            case 'dark': {
+                img.src = ''.concat(ZENKIPAY_ASSETS_URL, 'images/zenkipay-dark.svg');
+                break;
+            }
+
+            default: {
+                img.src = ''.concat(ZENKIPAY_ASSETS_URL, 'images/zenkipay-light.svg');
+            }
+        }
+
+        parentContainer.appendChild(img);
+        return img;
+    }
+
+    function setStyles2ZenkipayImg(img, options) {
+        var _options$style7;
+
+        switch (
+        options === null || options === void 0
+            ? void 0
+            : (_options$style7 = options.style) === null ||
+                _options$style7 === void 0
+                ? void 0
+                : _options$style7.size
+        ) {
+            case 'sm': {
+                img.style.height = '22px';
+                break;
+            }
+
+            case 'lg': {
+                img.style.height = '46px';
+                break;
+            }
+
+            default: {
+                img.style.height = '34px';
+            }
+        }
+
+        return img;
+    }
+
+    //#endregion BUTTON_ACTION
+
+    //#region MODAL_ACTION
+
+    async function createModal(baseZenkipayUrl, zenkipayUrl, options, callback) {
+        return new Promise((resolve) => {
+            const rootContainer = createRootContainer();
+            const modalContainer = createModalContainer(rootContainer);
+            const closeButton = createCloseButton(modalContainer, options);
+            createIFrame(modalContainer, zenkipayUrl, options);
+            window.addEventListener('message', handleZenkipayMessages);
+            closeButton.addEventListener('click', cancelModal);
+
+            function handleZenkipayMessages(_ref) {
+                let { data: content, origin } = _ref;
+                if (
+                    !(
+                        baseZenkipayUrl !== null &&
+                        baseZenkipayUrl !== void 0 &&
+                        baseZenkipayUrl.includes(origin)
+                    )
+                )
+                    return;
+
+                switch (content.type) {
+                    case POST_MSG_TYPE.DONE: {
+                        if (callback) {
+                            callback(null, content.data, {
+                                postMsgType: POST_MSG_TYPE.DONE,
+                                isCompleted: false,
+                            });
+                        }
+
+                        hideCloseButton();
+                        break;
+                    }
+
+                    case POST_MSG_TYPE.CANCEL: {
+                        cancelModal();
+                        break;
+                    }
+
+                    case POST_MSG_TYPE.CLOSE: {
+                        if (callback) {
+                            callback(null, content.data, {
+                                postMsgType: POST_MSG_TYPE.CLOSE,
+                                isCompleted: true,
+                            });
+                        }
+
+                        removeModal();
+                        break;
+                    }
+
+                    case POST_MSG_TYPE.ERROR: {
+                        if (callback) {
+                            callback(content.data, null, {
+                                postMsgType: POST_MSG_TYPE.ERROR,
+                                isCompleted: true,
+                            });
+                        }
+
+                        removeModal();
+                        break;
+                    }
+
+                    case POST_MSG_TYPE.HIDE_CLOSE_BTN: {
+                        hideCloseButton();
+                        break;
+                    }
+                }
+            }
+
+            function hideCloseButton() {
+                closeButton.removeEventListener('click', cancelModal);
+                const container = closeButton.parentElement;
+
+                if (container) {
+                    const parentContainer = container.parentElement;
+                    container.removeChild(closeButton);
+                    parentContainer && parentContainer.removeChild(container);
+                } else {
+                    closeButton.style.display = 'none';
+                }
+            }
+
+            function cancelModal() {
+                if (callback) {
+                    callback(null, null, {
+                        postMsgType: POST_MSG_TYPE.CANCEL,
+                        isCompleted: true,
+                    });
+                }
+
+                removeModal();
+            }
+
+            function removeModal() {
+                closeButton.removeEventListener('click', cancelModal);
+                window.removeEventListener('message', handleZenkipayMessages);
+                document.body.removeChild(rootContainer);
+                resolve(rootContainer);
+            }
+        });
+    }
+
+    //#region ROOT_CONTAINER_ACTION
+
+    function createRootContainer() {
+        let container = document.getElementById(ROOT_CONTAINER_ID);
+        container && document.body.removeChild(container);
+        container = document.createElement('div');
+        container = setStyles2RootContainer(container);
+        container.id = ROOT_CONTAINER_ID;
+        document.body.appendChild(container);
+        return container;
+    }
+
+    function setStyles2RootContainer(container) {
+        container.style.top = '0';
+        container.style.left = '0';
+        container.style.width = '100%';
+        container.style.height = '100vh';
+        container.style.position = 'fixed';
+        container.style.alignItems = 'center';
+        container.style.flexDirection = 'column';
+        container.style.justifyContent = 'center';
+        container.style.transition = 'opacity 250ms ease-in-out';
+        container.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        container.style.pointerEvents = 'auto';
+        container.style.visibility = 'visible';
+        container.style.zIndex = '999999';
+
+        container.style.display = 'flex';
+        container.style.opacity = '1';
+        return container;
+    }
+
+    //#endregion ROOT_CONTAINER_ACTION
+
+    //#region MODAL_CONTAINER_ACTION
+
+    function createModalContainer(parentContainer) {
+        let container = document.createElement('div');
+        container = setStyles2ModalContainer(container);
+        container.id = MODAL_CONTAINER_ID;
+        parentContainer.appendChild(container);
+        return container;
+    }
+
+    function setStyles2ModalContainer(container) {
+        const maxWidth = 600;
+        const height = 750;
+        const mediaQueryMaxWidth = maxWidth + 24;
+        const smMaxWidth = 'calc(100vw - 48px)';
+        const mdMaxWidth = ''.concat(maxWidth, 'px');
+
+        if (window.innerWidth <= mediaQueryMaxWidth) {
+            container.style.maxWidth = smMaxWidth;
+        } else {
+            container.style.maxWidth = mdMaxWidth;
+        }
+
+        container.style.width = '100%';
+        container.style.height = ''.concat(height, 'px');
+        container.style.maxHeight = 'calc(100vh - 48px)';
+        container.style.zIndex = '1000000';
+
+        const mediaQuery = window.matchMedia(
+            '(max-width: '.concat(mediaQueryMaxWidth, 'px)')
+        );
+        mediaQuery.addEventListener('change', (event) => {
+            if (event.matches) container.style.maxWidth = smMaxWidth;
+            else container.style.maxWidth = mdMaxWidth;
+        });
+        return container;
+    }
+
+    //#endregion MODAL_CONTAINER_ACTION
+
+    //#region CLOSE_BUTTON_ACTION
+
+    function createCloseButton(parentContainer, options) {
+        const closeButtonContainer = createCloseButtonContainer(parentContainer);
+        return prepareCloseButton(closeButtonContainer, options);
+    }
+
+    function createCloseButtonContainer(parentContainer) {
+        let container = document.createElement('div');
+        container = setStyles2CloseButtonContainer(container);
+        container.id = CLOSE_BTN_CONTAINER_ID;
+        parentContainer.appendChild(container);
+        return container;
+    }
+
+    function setStyles2CloseButtonContainer(container) {
+        container.style.position = 'relative';
+        return container;
+    }
+
+    function prepareCloseButton(parentContainer, options) {
+        let button = document.createElement('button');
+        button = setStyles2CloseButton(button, options);
+        button.id = CLOSE_BTN_ID;
+        createCloseIcon(button);
+        parentContainer.appendChild(button);
+        return button;
+    }
+
+    function createCloseIcon(parentContainer) {
+        const image = document.createElement('img');
+        image.src = ''.concat(ZENKIPAY_ASSETS_URL, 'icons/icon-close-light.svg');
+        image.style.verticalAlign = 'top';
+        parentContainer.appendChild(image);
+        return image;
+    }
+
+    function setStyles2CloseButton(button, options) {
+        var _options$style8;
+
+        button.style.padding = '8px';
+        button.style.position = 'absolute';
+        button.style.backgroundColor = '#efefef';
+        button.style.boxShadow = '-1px 1px 4px 1px rgba(0, 0, 0, 0.25)';
+        button.style.appearance = 'none';
+        button.style.cursor = 'pointer';
+        button.style.borderWidth = '0';
+        button.style.height = '40px';
+        button.style.width = '40px';
+        button.style.right = '-16px';
+        button.style.top = '-16px';
+        return setShape2Element(
+            button,
+            options === null || options === void 0
+                ? void 0
+                : (_options$style8 = options.style) === null ||
+                    _options$style8 === void 0
+                    ? void 0
+                    : _options$style8.shape
+        );
+    }
+
+    //#endregion CLOSE_BUTTON_ACTION
+
+    //#region IFRAME_ACTION
+
+    function createIFrame(parentContainer, zenkipayUrl, options) {
+        const iframeContainer = createIFrameContainer(parentContainer);
+        return prepareIframe(iframeContainer, zenkipayUrl, options);
+    }
+
+    function createIFrameContainer(parentContainer) {
+        let container = document.createElement('div');
+        container = setStyles2IFrameContainer(container);
+        container.id = IFRAME_CONTAINER_ID;
+        parentContainer.appendChild(container);
+        return container;
+    }
+
+    function setStyles2IFrameContainer(container) {
+        container.style.height = '100%';
+        return container;
+    }
+
+    function prepareIframe(container, zenkipayUrl, options) {
+        let iframe = document.createElement('iframe');
+        if (window.origin && window.origin !== 'null') iframe.name = window.origin;
+        iframe = setStyles2Iframe(iframe, options);
+        iframe.src = zenkipayUrl;
+        iframe.id = IFRAME_ID;
+        container.appendChild(iframe);
+        return iframe;
+    }
+
+    function setStyles2Iframe(iframe, options) {
+        var _options$style9;
+
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.borderWidth = '0';
+        return setShape2Element(
+            iframe,
+            options === null || options === void 0
+                ? void 0
+                : (_options$style9 = options.style) === null ||
+                    _options$style9 === void 0
+                    ? void 0
+                    : _options$style9.shape
+        );
+    }
+
+    //#endregion IFRAME_ACTION
+
+    //#endregion MODAL_ACTION
+
+    //#region SERVICES
+
+    function useHttpService() {
+        let baseUrl =
+            arguments.length > 0 && arguments[0] !== undefined
+                ? arguments[0]
+                : baseApiUrl;
+
+        async function request(url, method, options) {
+            url = ''.concat(baseUrl).concat(url);
+            let body = null;
+            let headers = null;
+
+            if (options) {
+                if (options !== null && options !== void 0 && options.body)
+                    body = json2String(options.body);
+                if (options !== null && options !== void 0 && options.headers)
+                    headers = options.headers;
+            }
+
+            const request = {
+                method,
+                ...(body && {
+                    body,
+                }),
+                ...(headers && {
+                    headers,
+                }),
+            };
+
+            const response = await fetch(url, request);
+            return response.json();
+        }
+
+        return {
+            async get(url, options) {
+                return request(url, 'GET', options);
+            },
+
+            async post(url, body, options) {
+                const requestOpts = { ...options, body };
+                return request(url, 'POST', requestOpts);
+            },
+
+            async put(url, body, options) {
+                const requestOpts = { ...options, body };
+                return request(url, 'PUT', requestOpts);
+            },
+
+            async patch(url, body, options) {
+                const requestOpts = { ...options, body };
+                return request(url, 'PATCH', requestOpts);
+            },
+
+            async delete(url, options) {
+                return request(url, 'DELETE', options);
+            },
+        };
+    }
+
+    function useCountryService() {
+        let baseUrl =
+            arguments.length > 0 && arguments[0] !== undefined
+                ? arguments[0]
+                : COUNTRY_API;
+        const http = useHttpService(baseUrl);
+        return {
+            async getCountry() {
+                const url = 'json';
+                const { country_code } = await http.get(url);
+                return country_code;
+            },
+        };
+    }
+
+    function useMerchantService(zenkipayKey) {
+        let baseUrl =
+            arguments.length > 1 && arguments[1] !== undefined
+                ? arguments[1]
+                : baseApiUrl;
+        const http = useHttpAction(zenkipayKey, baseUrl);
+        return {
+            async getMerchant() {
+                const url = 'v1/merchants/plugin';
+                const headers = {
+                    'Content-Type': 'text/plain',
+                };
+                return http.post(url, zenkipayKey, {
+                    headers,
+                });
+            },
+        };
+    }
+
+    function useOrderService(zenkipayKey) {
+        let baseUrl =
+            arguments.length > 1 && arguments[1] !== undefined
+                ? arguments[1]
+                : baseApiUrl;
+        const http = useHttpAction(zenkipayKey, baseUrl);
+        return {
+            async postPreOrder(merchant, purchaseData, country) {
+                const url = 'v1/orders/pre';
+                const preOrder = {
+                    orderPlacedAt: new Date(),
+                    merchantId: merchant.merchantId,
+                    merchantName: merchant.merchantName,
+                    merchantUnitId: merchant.merchantUnitId,
+                    country: country || purchaseData.country || '',
+                    totalAmount: purchaseData.amount,
+                    currency: purchaseData.currency,
+                    items: purchaseData.items,
+                };
+                const options = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                };
+                return http.post(url, preOrder, options);
+            },
+        };
+    }
+
+    //#endregion SERVICES
+
+    //#endregion ORCHESTRATORS
+})('https://dev-gateway.zenki.fi/', 'https://payments-dev.zenki.fi/#/', '');

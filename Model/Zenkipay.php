@@ -116,58 +116,64 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         $this->live_pk = $this->getConfigData('live_pk');                
         $this->pk = $this->is_sandbox ? $this->sandbox_pk : $this->live_pk;                                
     }    
-   
-    /**
-     * 
-     * @param \Magento\Payment\Model\InfoInterface $payment
-     * @param float $amount     
-     * @throws \Magento\Framework\Validator\Exception
-     */
-    public function order(\Magento\Payment\Model\InfoInterface $payment, $amount) {
-        /** @var \Magento\Sales\Model\Order $order */
-        $order = $payment->getOrder();
 
-        /** @var \Magento\Sales\Model\Order\Address $billing */
+    /**
+     * Assign corresponding data
+     *
+     * @param \Magento\Framework\DataObject|mixed $data
+     * @return $this
+     * @throws LocalizedException
+     */
+    public function assignData(\Magento\Framework\DataObject $data) {
+        parent::assignData($data);
+                
+        $infoInstance = $this->getInfoInstance();
+        $additionalData = ($data->getData('additional_data') != null) ? $data->getData('additional_data') : $data->getData();
+        
+        $infoInstance->setAdditionalInformation('zenkipay_order_id', 
+            isset($additionalData['zenkipay_order_id']) ? $additionalData['zenkipay_order_id'] :  null
+        );
+        
+        return $this;
+    }
+
+    /**
+     * Send capture request to gateway
+     *
+     * @param \Magento\Framework\DataObject|\Magento\Payment\Model\InfoInterface $payment
+     * @param float $amount
+     * @return $this
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function capture(\Magento\Payment\Model\InfoInterface $payment, $amount) {
+        /** @var \Magento\Sales\Model\Order $order */
+        $order = $payment->getOrder();   
+         /** @var \Magento\Sales\Model\Order\Address $billing */
         $billing = $order->getBillingAddress();
 
-        try {
-            $customer_data = array(
-                'requires_account' => false,
-                'name' => $billing->getFirstname(),
-                'last_name' => $billing->getLastname(),
-                'phone_number' => $billing->getTelephone(),
-                'email' => $order->getCustomerEmail()
-            );
-                                        
-            $charge_request = array(
-                'method' => 'store',
-                'currency' => strtolower($order->getBaseCurrencyCode()),
-                'amount' => $amount,
-                'description' => sprintf('ORDER #%s, %s', $order->getIncrementId(), $order->getCustomerEmail()),
-                'order_id' => $order->getIncrementId()
-            );            
-            
-            $this->logger->debug('#order', array('$customer_data' => $customer_data));
-            $this->logger->debug('#order', array('$charge_request' => $charge_request));                            
-                        
-            $payment->setTransactionId(666);                                
+        $this->logger->debug('#capture', array('$order_id' => $order->getIncrementId(), '$trx_id' => $payment->getLastTransId(), '$status' => $order->getStatus(), '$amount' => $amount));                    
+        
+        if ($amount <= 0) {
+            throw new \Magento\Framework\Exception\LocalizedException(__('Invalid amount for capture.'));
+        }               
 
-            // Actualiza el estado de la orden
-            $state = \Magento\Sales\Model\Order::STATE_NEW;
-            $order->setState($state)->setStatus($state);
+        $zenkipay_order_id = $this->getInfoInstance()->getAdditionalInformation('zenkipay_order_id');
+                
+        try {                                                             
+            $payment->setAmount($amount);
+            $payment->setTransactionId($zenkipay_order_id);                                            
             
             // Registra el ID de la transacción 
-            $order->setExtOrderId(666);                        
+            $order->setExtOrderId($zenkipay_order_id);                        
             $order->save();              
         } catch (\Exception $e) {
             $this->debugData(['exception' => $e->getMessage()]);
             $this->_logger->error(__( $e->getMessage()));
-            throw new \Magento\Framework\Validator\Exception(__($this->error($e)));
+            throw new \Magento\Framework\Validator\Exception(__($e->getMessage()));
         }
-
-        $payment->setSkipOrderProcessing(true);
+        
         return $this;
-    }      
+    }    
        
     public function getBaseUrlStore(){
         return $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_LINK);        
