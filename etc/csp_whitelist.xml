@@ -5,23 +5,24 @@
          <policy id="script-src">
             <values>
                 <value id="zenki" type="host">*.zenki.fi</value>  
-                <value id="openpay" type="host">*.s3.amazonaws.com</value>
-                <value id="stripe" type="host">*.stripe.com</value>                                          
+                <value id="openpay" type="host">*.s3.amazonaws.com</value>                                                        
             </values>
         </policy>
         <policy id="img-src">
             <values>                
-                <value id="zenki" type="host">zenki.fi</value>                           
+                <value id="zenki" type="host">zenki.fi</value>    
+                <value id="resources-zenki" type="host">*.zenki.fi</value>                         
             </values>
         </policy>
         <policy id="connect-src">
             <values>
-                <value id="zenki" type="host">*.zenki.fi</value>                                    
+                <value id="zenki" type="host">*.zenki.fi</value>    
+                <value id="ipapi" type="host">ipapi.co</value>                                    
             </values>
         </policy>    
         <policy id="frame-src">
             <values>                
-                <value id="stripe" type="host">*.stripe.com</value>                          
+                <value id="zenki" type="host">*.zenki.fi</value>                          
             </values>
         </policy>                   
     </policies>

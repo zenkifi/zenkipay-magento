@@ -11,10 +11,8 @@
 */
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <head>    
-        <script src="https://openpay.s3.amazonaws.com/openpay.v1.min.js" src_type="url" />        
-        <script src="https://js.stripe.com/v3/" src_type="url" />
-        <script src="https://dev-resources.zenki.fi/zenkipay/script/zenkipay.js" src_type="url" />
+    <head>            
+        <script src="https://dev-resources.zenki.fi/zenkipay/script/zenkipay.js" src_type="url" />        
         <!-- <script src="Zenki_Zenkipay::js/zenkipay.js"/> -->
     </head>
     <body>                   
@@ -55,6 +53,6 @@
                     </item>
                 </argument>
             </arguments>
-        </referenceBlock>            
+        </referenceBlock>               
     </body>
 </page>
