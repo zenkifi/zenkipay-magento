@@ -79,9 +79,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
             Data $paymentData, 
             ScopeConfigInterface $scopeConfig,
             WriterInterface $configWriter,
-            Logger $logger,
-            ModuleListInterface $moduleList, 
-            TimezoneInterface $localeDate, 
+            Logger $logger,            
             CountryFactory $countryFactory,             
             LoggerInterface $logger_interface,                        
             CustomerSession $customerSession,                                               
@@ -209,12 +207,42 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         return $this->_code;
     }
 
-    public function validateSettings() {        
-        return $this->getMerchantInfo();
+    public function validateSettings() {           
+        $response = $this->getMerchantInfo();
+        $array = json_decode(json_encode($response), true);
+        $this->logger->debug('#getMerchantInfo', ['response' => $array]);
+        if (!isset($array['access_token'])) {
+            throw new \Magento\Framework\Validator\Exception(__('Something went wrong while saving this configuration, your Zenkipay key is incorrect.'));
+        }
+        
+        return; 
     }
         
     public function getMerchantInfo() {
+        $url = "https://dev-gateway.zenki.fi/public/v1/merchants/plugin/token";
        
+        $ch = curl_init();
+        $payload = $this->pk;
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:text/plain'));
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        $result = curl_exec($ch);
+        $response = null;
+        if ($result === false) {
+            $this->logger->error("Curl error", array("curl_errno" => curl_errno($ch), "curl_error" => curl_error($ch)));
+        } else {
+            $info = curl_getinfo($ch);
+            $response = json_decode($result);
+            $response->http_code = $info['http_code'];
+            $this->logger->debug("request", array("HTTP code " => $info['http_code'], "on request to" => $info['url']));
+        }
+    
+        curl_close($ch);
+        $this->logger->debug('#request response', [json_encode($response)]);
+        return $response;
     }           
 
     public function getCurrentCurrency() {        

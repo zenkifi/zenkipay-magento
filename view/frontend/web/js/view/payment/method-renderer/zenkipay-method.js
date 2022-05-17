@@ -13,15 +13,16 @@ define(
     [
         'Magento_Checkout/js/view/payment/default',
         'jquery',
-        'Magento_Checkout/js/model/quote'
+        'Magento_Checkout/js/model/quote'        
     ],
     function (Component, $, quote) {
-        // 'use strict';
+        'use strict';
 
-        var zenkipayOrderId = '333';
+        var zenkipayOrderId = '';
         var totals = null;
-        var customerData = null;
-        var callbackUrl = window.checkoutConfig.payment.zenkipay.cb_url;
+        var customerInfo = null;
+        var customerMessages = customerData.get('messages')() || {};
+        var messages = customerMessages.messages || [];
 
         return Component.extend({
             defaults: {
@@ -43,12 +44,12 @@ define(
                 console.log('zenkiPay', zenkiPay);
 
                 totals = quote.totals._latestValue;
-                customerData = quote.billingAddress._latestValue;
+                customerInfo = quote.billingAddress._latestValue;
 
                 var publicKey = window.checkoutConfig.payment.zenkipay.public_key;
                 var amount = totals.grand_total;
                 var currency = totals.quote_currency_code;
-                var country = typeof customerData.countryId !== 'undefined' && customerData.countryId.length !== 0 ? customerData.countryId : '';
+                var country = typeof customerInfo.countryId !== 'undefined' && customerInfo.countryId.length !== 0 ? customerInfo.countryId : '';
                 var items = totals.items.map(item => ({
                     itemId: item.item_id,
                     quantity: item.qty,
@@ -86,20 +87,19 @@ define(
             },
             handleZenkipayEvents: function (error, data, details) {
                 console.log('handleZenkipayEvents', { error, data, details })
-                this.messageContainer.clear();
 
                 if (!error && details.postMsgType === 'done') {
                     zenkipayOrderId = data;
                     this.placeOrder();
-                    return;
                 }
 
-                if (error) {
+                if (error && details.postMsgType === 'error') {
                     this.messageContainer.addErrorMessage({
                         message: 'Ha ocurrido un error inesperado.'
                     });
-                    return;
                 }
+
+                return;
             },
             /**
              * @override
