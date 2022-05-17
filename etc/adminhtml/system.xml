@@ -41,15 +41,15 @@
                         <field id="is_sandbox">0</field>
                     </depends>
                 </field>                                                                                                                        
-                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="29" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Pago aplicable para países</label>
+                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Applicable Countries</label>
                     <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
                 </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Pago para países específicos</label>
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Specific Countries</label>
                     <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                 </field>                
-                <field id="sort_order" translate="label" type="text" sortOrder="34" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="sort_order" translate="label" type="text" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Order</label>
                 </field>
             </group>
