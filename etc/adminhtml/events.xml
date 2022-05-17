@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Zenki_Zenkipay events configuration
+ *
+ * @category    Payments
+ * @package     Zenki_Zenkipay
+ * @author      Federico Balderas
+ * @copyright   Zenki (https://zenki.fi)
+ * @license     http://www.apache.org/licenses/LICENSE-2.0  Apache License Version 2.0
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">    
+    <event name="admin_system_config_changed_section_payment">
+        <observer name="zenkipay_observer_check_config" instance="Zenki\Zenkipay\Observer\MerchantInfo"/>
+    </event>   
+</config>
