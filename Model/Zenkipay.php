@@ -208,10 +208,9 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     }
 
     public function validateSettings() {           
-        $response = $this->getMerchantInfo();
-        $array = json_decode(json_encode($response), true);
-        $this->logger->debug('#getMerchantInfo', ['response' => $array]);
-        if (!isset($array['access_token'])) {
+        $response = $this->getMerchantInfo();        
+        $this->logger->debug('#getMerchantInfo', ['response' => $response]);
+        if (!isset($response['access_token'])) {
             throw new \Magento\Framework\Validator\Exception(__('Something went wrong while saving this configuration, your Zenkipay key is incorrect.'));
         }
         
@@ -233,15 +232,11 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         $response = null;
         if ($result === false) {
             $this->logger->error("Curl error", array("curl_errno" => curl_errno($ch), "curl_error" => curl_error($ch)));
-        } else {
-            $info = curl_getinfo($ch);
-            $response = json_decode($result);
-            $response->http_code = $info['http_code'];
-            $this->logger->debug("request", array("HTTP code " => $info['http_code'], "on request to" => $info['url']));
-        }
-    
-        curl_close($ch);
-        $this->logger->debug('#request response', [json_encode($response)]);
+            return $response;
+        } 
+                    
+        $response = json_decode($result, true);                    
+        curl_close($ch);        
         return $response;
     }           
 
