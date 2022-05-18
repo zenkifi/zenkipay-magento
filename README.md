@@ -8,7 +8,6 @@ You need to have installed Composer v2.
 
 ## Installation
 
-Ir a la carpeta raíz del proyecto de Magento y seguir los siguiente pasos:
 Go to your root project and follow the next steps:
 
 ```bash
