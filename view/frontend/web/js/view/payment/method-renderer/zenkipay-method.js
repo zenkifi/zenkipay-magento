@@ -45,7 +45,7 @@ define(
                 customerInfo = quote.billingAddress._latestValue;
 
                 var publicKey = window.checkoutConfig.payment.zenkipay.public_key;
-                var amount = totals.grand_total;
+                var amount = totals.base_grand_total;
                 var currency = totals.quote_currency_code;
                 var country = typeof customerInfo.countryId !== 'undefined' && customerInfo.countryId.length !== 0 ? customerInfo.countryId : '';
                 var items = totals.items.map(item => ({
