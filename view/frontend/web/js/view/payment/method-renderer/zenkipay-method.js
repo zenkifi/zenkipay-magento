@@ -20,9 +20,7 @@ define(
 
         var zenkipayOrderId = '';
         var totals = null;
-        var customerInfo = null;
-        var customerMessages = customerData.get('messages')() || {};
-        var messages = customerMessages.messages || [];
+        var customerInfo = null;        
 
         return Component.extend({
             defaults: {
