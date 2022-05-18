@@ -1,21 +1,26 @@
 # Zenkipay-Magento2
 
-Extensión de pagos con Zenkipay para Magento2 (v0.1.0)
+Zenkipay payment extension for Magento2 (v0.3.3)
 
-## Instalación
+## PREREQUISITES
+
+You need to have installed Composer v2.
+
+## Installation
 
 Ir a la carpeta raíz del proyecto de Magento y seguir los siguiente pasos:
+Go to your root project and follow the next steps:
 
 ```bash
 composer require zenki/zenkipay-magento
-php bin/magento module:enable Zenki_Zenkipay --clear-static-content
-php bin/magento setup:upgrade
-php bin/magento cache:clean
+bin/magento module:enable Zenki_Zenkipay --clear-static-content
+bin/magento setup:upgrade
+bin/magento cache:clean
 ```
 
-## Actualización
+## Update
 
-En caso de ya contar con el módulo instalado y sea necesario actualizar, seguir los siguientes pasos:
+If you already have installed this module and you need to update it, follow the next steps:
 
 ```bash
 composer clear-cache
@@ -24,6 +29,6 @@ bin/magento setup:upgrade
 php bin/magento cache:clean
 ```
 
-### 1. Administración. Configuración del módulo
+### 1. Administration. Module configuraction
 
-Para configurar el módulo desde el panel de administración de la tienda diríjase a: Stores > Configuration > Sales > Payment Methods > Zenkipay
+Once you logged in as an admin from the store, go to: Stores > Configuration > Sales > Payment Methods > Zenkipay
