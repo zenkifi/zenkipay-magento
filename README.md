@@ -28,6 +28,6 @@ bin/magento setup:upgrade
 php bin/magento cache:clean
 ```
 
-### 1. Administration. Module configuraction
+### 1. Administration. Module configuration
 
 Once you logged in as an admin from the store, go to: Stores > Configuration > Sales > Payment Methods > Zenkipay
