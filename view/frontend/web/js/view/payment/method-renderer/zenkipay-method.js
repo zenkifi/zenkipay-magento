@@ -47,12 +47,13 @@ define(
                 var publicKey = window.checkoutConfig.payment.zenkipay.public_key;
                 var amount = totals.base_grand_total;
                 var currency = totals.quote_currency_code;
-                var country = typeof customerInfo.countryId !== 'undefined' && customerInfo.countryId.length !== 0 ? customerInfo.countryId : '';
+                var country = typeof customerInfo.countryId !== 'undefined' && customerInfo.countryId.length !== 0 ? customerInfo.countryId : '';                
+
                 var items = totals.items.map(item => ({
                     itemId: item.item_id,
+                    productName: item.name,                    
                     quantity: item.qty,
-                    price: item.price,
-                    thumbnailUrl: ''
+                    price: item.price                    
                 }));
 
                 var zenkipayKey = publicKey;
