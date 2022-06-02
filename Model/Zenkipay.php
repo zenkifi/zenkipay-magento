@@ -218,7 +218,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     }
         
     public function getMerchantInfo() {
-        $url = "https://dev-gateway.zenki.fi/public/v1/merchants/plugin/token";
+        $url = "https://uat-gateway.zenki.fi/public/v1/merchants/plugin/token";
        
         $ch = curl_init();
         $payload = $this->pk;
