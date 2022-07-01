@@ -102,6 +102,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         $this->is_sandbox = $this->getConfigData('is_sandbox');
         $this->sandbox_pk = $this->getConfigData('sandbox_pk');
         $this->live_pk = $this->getConfigData('live_pk');
+        $this->rsa_private_key = $this->getConfigData('rsa_private_key');
         $this->pk = $this->is_sandbox ? $this->sandbox_pk : $this->live_pk;
         $this->base_url = $this->is_sandbox ? $sandbox_url : $url;
     }
@@ -192,11 +193,16 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     }
 
     /**
-     * @return boolean
+     * @return string
      */
     public function isSandbox()
     {
         return $this->is_sandbox;
+    }
+
+    public function getRsaPrivateKey()
+    {
+        return $this->rsa_private_key;
     }
 
     public function getCode()
@@ -210,9 +216,46 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         if (!$response) {
             throw new \Magento\Framework\Validator\Exception(__('Something went wrong while saving this configuration, your Zenkipay key is incorrect.'));
         }
+
+        if (!$this->validateRSAPrivateKey($this->rsa_private_key)) {
+            throw new \Magento\Framework\Validator\Exception(__('Invalid RSA private key has been provided.'));
+        }
+
         return;
     }
 
+    /**
+     * Checks if the plain RSA private key is valid
+     *
+     * @param string $plain_rsa_private_key Plain RSA private key
+     *
+     * @return boolean
+     */
+    protected function validateRSAPrivateKey(string $plain_rsa_private_key)
+    {
+        try {
+            $private_key = openssl_pkey_get_private($plain_rsa_private_key);
+
+            if (is_resource($private_key)) {
+                $public_key = openssl_pkey_get_details($private_key);
+
+                if (is_array($public_key) && isset($public_key['key'])) {
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (\Exception $e) {
+            $this->logger->error('Zenkipay - validateRSAPrivateKey: ', ['msg' => $e->getMessage(), 'traceAsString' => $e->getTraceAsString()]);
+            return false;
+        }
+    }
+
+    /**
+     * Checks if the Zenkipay key is valid
+     *
+     * @return boolean
+     */
     protected function validateZenkipayKey()
     {
         $result = $this->getAccessToken();
@@ -223,6 +266,11 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         return false;
     }
 
+    /**
+     * Get Zenkipay access token
+     *
+     * @return array
+     */
     protected function getAccessToken()
     {
         $url = $this->base_url . '/public/v1/merchants/plugin/token';
@@ -247,6 +295,14 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         return json_decode($result, true);
     }
 
+    /**
+     * Updates Zenkipay's merchantOrderId after WooCommerce register the order
+     *
+     * @param mixed $zenkipay_order_id
+     * @param mixed $order_id
+     *
+     * @return boolean
+     */
     protected function updateZenkipayOrder($zenkipay_order_id, $order_id)
     {
         try {
@@ -282,11 +338,5 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
             $this->logger->error('Zenkipay - updateZenkipayOrder: ', ['msg' => $e->getMessage(), 'traceAsString' => $e->getTraceAsString()]);
             return false;
         }
-    }
-
-    public function getCurrentCurrency()
-    {
-        // return $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
-        return $this->_storeManager->getStore()->getCurrentCurrencyCode();
     }
 }
