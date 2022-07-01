@@ -9,11 +9,10 @@
  */
 /*browser:true*/
 /*global define*/
-define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/js/model/quote'], function (Component, $, quote) {
+define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/js/model/quote', 'Magento_Ui/js/model/messageList'], function (Component, $, quote, globalMessageList) {
     'use strict';
-
-    var totals = null;
-    var customerInfo = null;
+    
+    var messageContainer = messageContainer || globalMessageList;
 
     return Component.extend({
         defaults: {
@@ -31,43 +30,22 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
         /**
          * Prepare and process payment information
          */
-        preparePayment: function () {
-            totals = quote.totals._latestValue;
-            customerInfo = quote.billingAddress._latestValue;
-
-            var shopperCarId = quote.getQuoteId();
-            var publicKey = window.checkoutConfig.payment.zenkipay.public_key;
-            var amount = totals.base_grand_total;
-            var currency = totals.quote_currency_code;
-            var country = typeof customerInfo.countryId !== 'undefined' && customerInfo.countryId.length !== 0 ? customerInfo.countryId : '';
-
-            var items = totals.items.map((item) => ({
-                itemId: item.item_id,
-                productName: item.name,
-                quantity: item.qty,
-                price: item.price,
-            }));
-
-            var zenkipayKey = publicKey;
-
-            var purchaseData = {
-                amount,
-                country,
-                currency,
-                shopperCarId,
-                items,
-            };
+        preparePayment: function () {            
+            var zenkipayKey = window.checkoutConfig.payment.zenkipay.public_key;
+            var purchaseData = window.checkoutConfig.payment.zenkipay.purchase_data;
+            var zenkipaySignature = window.checkoutConfig.payment.zenkipay.signature;           
 
             var purchaseOptions = {
                 style: {
                     shape: 'square',
                     theme: 'light',
                 },
-                zenkipayKey: zenkipayKey,
+                zenkipayKey,
                 purchaseData,
+                signature: {
+                    zenkipaySignature,
+                },
             };
-
-            console.log('#preparePayment', { purchaseOptions });
 
             zenkiPay.openModal(purchaseOptions, this.handleZenkipayEvents);
         },
@@ -79,9 +57,13 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
             }
 
             if (error && details.postMsgType === 'error') {
-                this.messageContainer.addErrorMessage({
+                // this.messageContainer.addErrorMessage({
+                //     message: 'Ha ocurrido un error inesperado.',
+                // });
+                messageContainer.addErrorMessage({
                     message: 'Ha ocurrido un error inesperado.',
                 });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
             return;

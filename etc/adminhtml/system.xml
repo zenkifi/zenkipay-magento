@@ -28,15 +28,23 @@
                 </field>                                             
                 <field id="sandbox_pk" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Sandbox Zenkipay key</label>
+                    <validate>no-marginal-whitespace</validate> 
                     <depends>
                         <field id="is_sandbox">1</field>
                     </depends>
                 </field>          
                 <field id="live_pk" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Production Zenkipay key</label>
+                    <validate>no-marginal-whitespace</validate> 
                     <depends>
                         <field id="is_sandbox">0</field>
                     </depends>
+                </field>    
+                <field id="rsa_private_key" translate="label" type="textarea" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>RSA private key</label>  
+                    <comment>Copy and paste your private key here with: "cat /path/to/your/private-key.pem | pbcopy".</comment>                  
+                    <tooltip>RSA private key is required to sign tha transactions.</tooltip>
+                    <validate>required-entry</validate> 
                 </field>                                                                                                                        
                 <field id="allowspecific" translate="label" type="allowspecific" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Payment from Applicable Countries</label>
