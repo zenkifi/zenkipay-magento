@@ -41,7 +41,9 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
                 },
                 zenkipayKey,
                 purchaseData,
-                zenkipaySignature,
+                signature: {
+                    zenkipaySignature,
+                },
             };
 
             zenkiPay.openModal(purchaseOptions, function (error, data, details) {
