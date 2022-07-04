@@ -236,7 +236,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         try {
             $private_key = openssl_pkey_get_private($plain_rsa_private_key);
 
-            if (is_resource($private_key)) {
+            if (is_object($private_key)) {
                 $public_key = openssl_pkey_get_details($private_key);
 
                 if (is_array($public_key) && isset($public_key['key'])) {
