@@ -9,10 +9,8 @@
  */
 /*browser:true*/
 /*global define*/
-define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/js/model/quote', 'Magento_Ui/js/model/messageList'], function (Component, $, quote, globalMessageList) {
+define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/js/model/quote'], function (Component, $, quote) {
     'use strict';
-    
-    var messageContainer = messageContainer || globalMessageList;
 
     return Component.extend({
         defaults: {
@@ -30,10 +28,11 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
         /**
          * Prepare and process payment information
          */
-        preparePayment: function () {            
+        preparePayment: function () {
+            var self = this;
             var zenkipayKey = window.checkoutConfig.payment.zenkipay.public_key;
             var purchaseData = window.checkoutConfig.payment.zenkipay.purchase_data;
-            var zenkipaySignature = window.checkoutConfig.payment.zenkipay.signature;           
+            var zenkipaySignature = window.checkoutConfig.payment.zenkipay.signature;
 
             var purchaseOptions = {
                 style: {
@@ -42,31 +41,25 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
                 },
                 zenkipayKey,
                 purchaseData,
-                signature: {
-                    zenkipaySignature,
-                },
+                zenkipaySignature,
             };
 
-            zenkiPay.openModal(purchaseOptions, this.handleZenkipayEvents);
-        },
-        handleZenkipayEvents: function (error, data, details) {
-            if (!error && details.postMsgType === 'done') {
-                var zenkipayOrderId = data.orderId;
-                $('#zenkipay_order_id').val(zenkipayOrderId);
-                this.placeOrder();
-            }
+            zenkiPay.openModal(purchaseOptions, function (error, data, details) {
+                if (!error && details.postMsgType === 'done') {
+                    var zenkipayOrderId = data.orderId;
+                    $('#zenkipay_order_id').val(zenkipayOrderId);
+                    self.placeOrder();
+                }
 
-            if (error && details.postMsgType === 'error') {
-                // this.messageContainer.addErrorMessage({
-                //     message: 'Ha ocurrido un error inesperado.',
-                // });
-                messageContainer.addErrorMessage({
-                    message: 'Ha ocurrido un error inesperado.',
-                });
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+                if (error && details.postMsgType === 'error') {
+                    self.messageContainer.addErrorMessage({
+                        message: 'An unexpected error has occurred.',
+                    });
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
 
-            return;
+                return;
+            });
         },
         /**
          * @override
