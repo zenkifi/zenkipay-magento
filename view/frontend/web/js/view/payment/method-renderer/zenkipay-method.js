@@ -32,7 +32,7 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
             var self = this;
             var zenkipayKey = window.checkoutConfig.payment.zenkipay.public_key;
             var purchaseData = window.checkoutConfig.payment.zenkipay.purchase_data;
-            var zenkipaySignature = window.checkoutConfig.payment.zenkipay.signature;
+            var purchaseSignature = window.checkoutConfig.payment.zenkipay.signature;
 
             var purchaseOptions = {
                 style: {
@@ -41,9 +41,7 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
                 },
                 zenkipayKey,
                 purchaseData,
-                signature: {
-                    zenkipaySignature,
-                },
+                purchaseSignature,
             };
 
             zenkiPay.openModal(purchaseOptions, function (error, data, details) {
