@@ -53,23 +53,39 @@ class ZenkipayConfigProvider implements ConfigProviderInterface
         foreach ($this->methodCodes as $code) {
             if ($this->methods[$code]->isAvailable()) {
                 $items = [];
-                $billing_address = $this->cart->getQuote()->getBillingAddress();
+                $quote = $this->cart->getQuote();
+                // $billing_address = $quote->getBillingAddress();
 
                 foreach ($this->cart->getQuote()->getAllItems() as $item) {
                     $items[] = [
                         'itemId' => $item->getProductId(),
                         'productName' => $item->getName(),
                         'quantity' => $item->getQty(),
-                        'price' => round($item->getPrice(), 2),
+                        'price' => round($item->getPrice(), 2), // without taxes
                     ];
                 }
 
+                $totalItemsAmount = $quote->getSubtotal();
+                $shipmentAmount = $quote->getShippingAddress()->getShippingAmount();
+                $subtotalAmount = $shipmentAmount + $totalItemsAmount;
+                $discount = $totalItemsAmount - $quote->getSubtotalWithDiscount();
+
                 $purchase_data = [
-                    'amount' => round($this->cart->getQuote()->getBaseGrandTotal(), 2),
-                    'country' => $billing_address->getCountryId(),
-                    'currency' => $this->cart->getQuote()->getQuoteCurrencyCode(),
+                    // 'country' => $billing_address->getCountryId(),
+                    'shopperEmail' => $quote->getCustomerEmail(),
                     'items' => $items,
-                    'shopperCarId' => $this->cart->getQuote()->getId(),
+                    'shopperCarId' => $quote->getId(),
+                    'purchaseSummary' => [
+                        'currency' => $this->cart->getQuote()->getQuoteCurrencyCode(),
+                        'totalItemsAmount' => round($totalItemsAmount, 2), // without taxes
+                        'shipmentAmount' => round($shipmentAmount, 2), // without taxes
+                        'subtotalAmount' => round($subtotalAmount, 2), // without taxes
+                        'taxesAmount' => round($quote->getTotals()['tax']->getValue(), 2),
+                        'discountAmount' => round($discount, 2),
+                        'grandTotalAmount' => round($quote->getBaseGrandTotal(), 2),
+                        'localTaxesAmount' => 0,
+                        'importCosts' => 0,
+                    ],
                 ];
 
                 $payload = json_encode($purchase_data);
