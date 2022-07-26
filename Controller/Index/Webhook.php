@@ -47,7 +47,7 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
         error_reporting(E_ERROR);
         header('Content-type: application/json');
 
-        $payload = file_get_contents('php://input');
+        $payload = file_get_contents('php://input');        
 
         $headers = apache_request_headers();
         $svix_headers = [];
@@ -61,22 +61,22 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
             $wh = new \Svix\Webhook($secret);
             $json = $wh->verify($payload, $svix_headers);
 
-            if ($json->transactionStatus != 'COMPLETED') {
+            if ($json['transactionStatus'] != 'COMPLETED') {
                 return;
             }
 
-            if (!empty($json->merchantOrderId)) {
+            if (isset($json['merchantOrderId'])) {
                 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-                $order = $objectManager->create('\Magento\Sales\Model\OrderRepository')->get($json->merchantOrderId);
+                $order = $objectManager->create('\Magento\Sales\Model\OrderRepository')->get($json['merchantOrderId']);
 
                 $status = \Magento\Sales\Model\Order::STATE_PROCESSING;
                 $order->setState($status)->setStatus($status);
-                $order->setTotalPaid($json->totalAmount);
+                $order->setTotalPaid($json['totalAmount']);
                 $order->addStatusHistoryComment('Pago recibido exitosamente')->setIsCustomerNotified(true);
                 $order->save();
 
                 $invoice = $this->invoiceService->prepareInvoice($order);
-                $invoice->setTransactionId($json->orderId);
+                $invoice->setTransactionId($json['orderId']);
                 $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
                 $invoice->register();
                 $invoice->save();
