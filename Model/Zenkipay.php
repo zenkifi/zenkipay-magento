@@ -40,6 +40,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     protected $_canRefundInvoicePartial = false;
     protected $_canAuthorize = true;
     protected $_canVoid = true;
+    protected $_isOffline = true;
     protected $is_sandbox;
     protected $pk;
     protected $sandbox_pk;
@@ -50,6 +51,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     protected $_storeManager;
     protected $customerSession;
     protected $configWriter;
+    protected $webhook_signing_secret;
 
     /**
      *
@@ -103,74 +105,49 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         $this->sandbox_pk = $this->getConfigData('sandbox_pk');
         $this->live_pk = $this->getConfigData('live_pk');
         $this->rsa_private_key = $this->getConfigData('rsa_private_key');
+        $this->webhook_signing_secret = $this->getConfigData('webhook_signing_secret');
         $this->pk = $this->is_sandbox ? $this->sandbox_pk : $this->live_pk;
         $this->base_url = $this->is_sandbox ? $sandbox_url : $url;
     }
 
     /**
-     * Assign corresponding data
      *
-     * @param \Magento\Framework\DataObject|mixed $data
-     * @return $this
-     * @throws LocalizedException
+     * @param \Magento\Payment\Model\InfoInterface $payment
+     * @param float $amount
+     * @return \Openpay\Stores\Model\Payment
+     * @throws \Magento\Framework\Validator\Exception
      */
-    public function assignData(\Magento\Framework\DataObject $data)
+    public function order(\Magento\Payment\Model\InfoInterface $payment, $amount)
     {
-        parent::assignData($data);
+        /** @var \Magento\Sales\Model\Order $order */
+        $order = $payment->getOrder();
 
-        $infoInstance = $this->getInfoInstance();
-        $additionalData = $data->getData('additional_data') != null ? $data->getData('additional_data') : $data->getData();
+        try {
+            // Actualiza el estado de la orden
+            $state = \Magento\Sales\Model\Order::STATE_NEW;
+            $order->setState($state)->setStatus($state);
+            $order->save();
+        } catch (\Exception $e) {
+            $this->debugData(['exception' => $e->getMessage()]);
+            $this->_logger->error(__($e->getMessage()));
+            throw new \Magento\Framework\Validator\Exception(__($this->error($e)));
+        }
 
-        $infoInstance->setAdditionalInformation('zenkipay_order_id', isset($additionalData['zenkipay_order_id']) ? $additionalData['zenkipay_order_id'] : null);
-
+        $payment->setSkipOrderProcessing(true);
         return $this;
     }
 
     /**
-     * Send capture request to gateway
-     *
-     * @param \Magento\Framework\DataObject|\Magento\Payment\Model\InfoInterface $payment
-     * @param float $amount
-     * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return string
      */
-    public function capture(\Magento\Payment\Model\InfoInterface $payment, $amount)
-    {
-        /** @var \Magento\Sales\Model\Order $order */
-        $order = $payment->getOrder();
-        /** @var \Magento\Sales\Model\Order\Address $billing */
-
-        $this->logger->debug('#capture', ['$order_id' => $order->getIncrementId(), '$trx_id' => $payment->getLastTransId(), '$status' => $order->getStatus(), '$amount' => $amount]);
-
-        if ($amount <= 0) {
-            throw new \Magento\Framework\Exception\LocalizedException(__('Invalid amount for capture.'));
-        }
-
-        $zenkipay_order_id = $this->getInfoInstance()->getAdditionalInformation('zenkipay_order_id');
-
-        try {
-            $payment->setAmount($amount);
-            $payment->setTransactionId($zenkipay_order_id);
-
-            // Registra el ID de la transacción
-            $order->setExtOrderId($zenkipay_order_id);
-            $order->save();
-
-            $this->updateZenkipayOrder($zenkipay_order_id, $order->getId());
-        } catch (\Exception $e) {
-            $this->debugData(['exception' => $e->getMessage()]);
-            $this->logger->error(__($e->getMessage()));
-            throw new \Magento\Framework\Validator\Exception(__($e->getMessage()));
-        }
-
-        return $this;
-    }
-
     public function getBaseUrlStore()
     {
         return $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_LINK);
     }
 
+    /**
+     * @return boolean
+     */
     public function isLoggedIn()
     {
         return $this->customerSession->isLoggedIn();
@@ -187,6 +164,9 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         return parent::isAvailable($quote);
     }
 
+    /**
+     * @return string
+     */
     public function getPublicKey()
     {
         return $this->pk;
@@ -200,16 +180,35 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         return $this->is_sandbox;
     }
 
+    /**
+     * @return string
+     */
     public function getRsaPrivateKey()
     {
         return $this->rsa_private_key;
     }
 
+    /**
+     * @return string
+     */
+    public function getWebhookSigningSecret()
+    {
+        return $this->webhook_signing_secret;
+    }
+
+    /**
+     * @return string
+     */
     public function getCode()
     {
         return $this->_code;
     }
 
+    /**
+     * Validates keys (plugin and RSA)
+     *
+     * @return \Exception|void
+     */
     public function validateSettings()
     {
         $response = $this->validateZenkipayKey();
@@ -231,17 +230,21 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
      *
      * @return boolean
      */
-    protected function validateRSAPrivateKey(string $plain_rsa_private_key)
+    protected function validateRSAPrivateKey($plain_rsa_private_key)
     {
         try {
+            if (empty($plain_rsa_private_key)) {
+                return false;
+            }
+
             $private_key = openssl_pkey_get_private($plain_rsa_private_key);
+            if (!is_resource($private_key) && !is_object($private_key)) {
+                return false;
+            }
 
-            if (is_object($private_key)) {
-                $public_key = openssl_pkey_get_details($private_key);
-
-                if (is_array($public_key) && isset($public_key['key'])) {
-                    return true;
-                }
+            $public_key = openssl_pkey_get_details($private_key);
+            if (is_array($public_key) && isset($public_key['key'])) {
+                return true;
             }
 
             return false;

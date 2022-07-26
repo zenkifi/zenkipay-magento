@@ -54,7 +54,6 @@ class ZenkipayConfigProvider implements ConfigProviderInterface
             if ($this->methods[$code]->isAvailable()) {
                 $items = [];
                 $quote = $this->cart->getQuote();
-                // $billing_address = $quote->getBillingAddress();
 
                 foreach ($this->cart->getQuote()->getAllItems() as $item) {
                     $items[] = [
@@ -71,7 +70,6 @@ class ZenkipayConfigProvider implements ConfigProviderInterface
                 $discount = $totalItemsAmount - $quote->getSubtotalWithDiscount();
 
                 $purchase_data = [
-                    // 'country' => $billing_address->getCountryId(),
                     'shopperEmail' => $quote->getCustomerEmail(),
                     'items' => $items,
                     'shopperCarId' => $quote->getId(),
