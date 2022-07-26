@@ -4,6 +4,9 @@
     "type": "magento2-module",
     "minimum-stability": "stable",
     "license": "Apache-2.0",
+    "require": {
+        "svix/svix": "^0.63.1"
+    },
     "authors": [
         {
             "name": "Zenki",

@@ -23,54 +23,6 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
 
         isActive: function () {
             return true;
-        },
-
-        /**
-         * Prepare and process payment information
-         */
-        preparePayment: function () {
-            var self = this;
-            var zenkipayKey = window.checkoutConfig.payment.zenkipay.public_key;
-            var purchaseData = window.checkoutConfig.payment.zenkipay.purchase_data;
-            var purchaseSignature = window.checkoutConfig.payment.zenkipay.signature;
-
-            var purchaseOptions = {
-                style: {
-                    shape: 'square',
-                    theme: 'light',
-                },
-                zenkipayKey,
-                purchaseData,
-                purchaseSignature,
-            };
-
-            zenkiPay.openModal(purchaseOptions, function (error, data, details) {
-                if (!error && details.postMsgType === 'done') {
-                    var zenkipayOrderId = data.orderId;
-                    $('#zenkipay_order_id').val(zenkipayOrderId);
-                    self.placeOrder();
-                }
-
-                if (error && details.postMsgType === 'error') {
-                    self.messageContainer.addErrorMessage({
-                        message: 'An unexpected error has occurred.',
-                    });
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-
-                return;
-            });
-        },
-        /**
-         * @override
-         */
-        getData: function () {
-            return {
-                method: 'zenki_zenkipay',
-                additional_data: {
-                    zenkipay_order_id: $('#zenkipay_order_id').val(),
-                },
-            };
-        },
+        },        
     });
 });
