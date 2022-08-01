@@ -25,7 +25,7 @@ define(['jquery'], function ($) {
             zenkipayKey,
             purchaseData,
             purchaseSignature,
-        };        
+        };
 
         zenkiPay.openModal(purchaseOptions, function (error, data, details) {
             if (!error && details.postMsgType === 'done') {

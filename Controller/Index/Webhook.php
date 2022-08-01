@@ -47,7 +47,7 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
         error_reporting(E_ERROR);
         header('Content-type: application/json');
 
-        $payload = file_get_contents('php://input');        
+        $payload = file_get_contents('php://input');
 
         $headers = apache_request_headers();
         $svix_headers = [];
@@ -72,7 +72,8 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
                 $status = \Magento\Sales\Model\Order::STATE_PROCESSING;
                 $order->setState($status)->setStatus($status);
                 $order->setTotalPaid($json['totalAmount']);
-                $order->addStatusHistoryComment('Pago recibido exitosamente')->setIsCustomerNotified(true);
+                $order->addStatusHistoryComment('Payment received successfully')->setIsCustomerNotified(true);
+                $order->setExtOrderId($json['orderId']);
                 $order->save();
 
                 $invoice = $this->invoiceService->prepareInvoice($order);

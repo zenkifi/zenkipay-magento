@@ -46,6 +46,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     protected $sandbox_pk;
     protected $live_pk;
     protected $base_url;
+    protected $api_url;
     protected $scopeConfig;
     protected $logger;
     protected $_storeManager;
@@ -108,6 +109,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         $this->webhook_signing_secret = $this->getConfigData('webhook_signing_secret');
         $this->pk = $this->is_sandbox ? $this->sandbox_pk : $this->live_pk;
         $this->base_url = $this->is_sandbox ? $sandbox_url : $url;
+        $this->api_url = 'https://dev-api.zenki.fi';
     }
 
     /**
@@ -232,6 +234,15 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
      */
     protected function validateRSAPrivateKey($plain_rsa_private_key)
     {
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $dir = $objectManager->get('\Magento\Framework\Filesystem\DirectoryList');
+        $path = $dir->getPath('var') . '/log/debug.log';
+
+        $writer = new \Laminas\Log\Writer\Stream($path);
+        $logger = new \Laminas\Log\Logger();
+        $logger->addWriter($writer);
+        $logger->info('Your text message');
+
         try {
             if (empty($plain_rsa_private_key)) {
                 return false;
@@ -341,5 +352,54 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
             $this->logger->error('Zenkipay - updateZenkipayOrder: ', ['msg' => $e->getMessage(), 'traceAsString' => $e->getTraceAsString()]);
             return false;
         }
+    }
+
+    public function handleTrackingNumber($data)
+    {
+        try {
+            $url = $this->api_url;
+            $method = 'POST';
+
+            $result = $this->customRequest($url, $method, $data);
+
+            $this->logger->info('Zenkipay - handleTrackingNumber => ' . json_encode($data));            
+            $this->logger->info('Zenkipay - handleTrackingNumber => ' . $result);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Zenkipay - handleTrackingNumber: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    protected function customRequest($url, $method, $data)
+    {
+        $token_result = $this->getAccessToken();
+        $this->logger->info('Zenkipay - customRequest => ' . json_encode($token_result));
+
+        if (!array_key_exists('access_token', $token_result)) {
+            $this->logger->error('Zenkipay  - customRequest: Error al obtener access_token');
+            throw new \Exception('Invalid access token');
+        }
+
+        $headers = ['Accept: */*', 'Content-Type: application/json', 'Authorization: Bearer ' . $token_result['access_token']];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+        $result = curl_exec($ch);
+
+        if ($result === false) {
+            $this->logger->error('Curl error ' . curl_errno($ch) . ': ' . curl_error($ch));
+            throw new \Exception(curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        return $result;
     }
 }
