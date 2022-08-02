@@ -233,15 +233,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
      * @return boolean
      */
     protected function validateRSAPrivateKey($plain_rsa_private_key)
-    {
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $dir = $objectManager->get('\Magento\Framework\Filesystem\DirectoryList');
-        $path = $dir->getPath('var') . '/log/debug.log';
-
-        $writer = new \Laminas\Log\Writer\Stream($path);
-        $logger = new \Laminas\Log\Logger();
-        $logger->addWriter($writer);
-        $logger->info('Your text message');
+    {        
 
         try {
             if (empty($plain_rsa_private_key)) {
