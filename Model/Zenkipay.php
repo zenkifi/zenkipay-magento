@@ -89,9 +89,6 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     ) {
         parent::__construct($context, $registry, $extensionFactory, $customAttributeFactory, $paymentData, $scopeConfig, $logger, null, null, $data);
 
-        $sandbox_url = 'https://dev-gateway.zenki.fi';
-        $url = 'https://uat-gateway.zenki.fi';
-
         $this->customerSession = $customerSession;
 
         $this->_storeManager = $storeManager;
@@ -108,8 +105,8 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         $this->rsa_private_key = $this->getConfigData('rsa_private_key');
         $this->webhook_signing_secret = $this->getConfigData('webhook_signing_secret');
         $this->pk = $this->is_sandbox ? $this->sandbox_pk : $this->live_pk;
-        $this->base_url = $this->is_sandbox ? $sandbox_url : $url;
-        $this->api_url = 'https://dev-api.zenki.fi';
+        $this->base_url = 'https://prod-gateway.zenki.fi';
+        $this->api_url = 'https://api.zenki.fi';
     }
 
     /**
@@ -233,8 +230,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
      * @return boolean
      */
     protected function validateRSAPrivateKey($plain_rsa_private_key)
-    {        
-
+    {
         try {
             if (empty($plain_rsa_private_key)) {
                 return false;
@@ -354,7 +350,8 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
 
             $result = $this->customRequest($url, $method, $data);
 
-            $this->logger->info('Zenkipay - handleTrackingNumber => ' . json_encode($data));            
+            $this->logger->info('Zenkipay - handleTrackingNumber => ' . json_encode($data));
+            $this->logger->info('Zenkipay - handleTrackingNumber => ' . $url);
             $this->logger->info('Zenkipay - handleTrackingNumber => ' . $result);
 
             return true;
