@@ -11,10 +11,10 @@
 */
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">    
-    <body>          
-        <referenceBlock name="head.additional">
-            <block class="Magento\Framework\View\Element\Template" name="custom_head_file" template="Zenki_Zenkipay::custom_head.phtml"/>
-        </referenceBlock>       
+    <head>            
+        <script src="https://resources.zenki.fi/zenkipay/script/zenkipay.js" src_type="url" />
+    </head>
+    <body>                      
         <referenceBlock name="page.main.title">
             <block class="Magento\Checkout\Block\Onepage\Success" name="checkout.success.print.button" template="button.phtml"/>
             <action method="setPageTitle">

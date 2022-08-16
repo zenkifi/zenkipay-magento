@@ -3,8 +3,4 @@ $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 $model = $objectManager->create('Zenki\Zenkipay\Model\Zenkipay');
 ?>
 
-<?php if ($model->isSandbox()): ?>
-    <script src="https://dev-resources.zenki.fi/zenkipay/script/zenkipay.js" src_type="url" />     
-<?php else: ?>
-    <script src="https://uat-resources.zenki.fi/zenkipay/script/zenkipay.js" src_type="url" /> 
-<?php endif; ?>
+<script src="https://resources.zenki.fi/zenkipay/script/zenkipay.js" src_type="url" /> 

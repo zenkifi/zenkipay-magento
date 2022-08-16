@@ -16,7 +16,7 @@
             <group id="zenki_zenkipay" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Zenkipay</label>
                 <comment>
-                    <![CDATA[<a href="https://portal-dev.zenki.fi" target="_blank">Need a key? Create your Zenkipay account here</a>]]>
+                    <![CDATA[<a href="https://portal.zenki.fi" target="_blank">Need a key? Create your Zenkipay account here</a>]]>
                 </comment>
                 <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Enabled</label>
