@@ -40,15 +40,15 @@
                         <field id="is_sandbox">0</field>
                     </depends>
                 </field>    
-                <field id="webhook_signing_secret" translate="label" type="password" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="webhook_signing_secret" translate="label comment tooltip" type="password" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Webhook signing secret</label>
                     <validate>required-entry no-whitespace</validate>  
                     <comment>You can get this secret from your Zenkipay Dashboard: Configurations > Webhooks.</comment>                                      
                     <tooltip>Signing secret is required to confirm the orders.</tooltip>
                 </field>    
-                <field id="rsa_private_key" translate="label" type="textarea" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="rsa_private_key" translate="label comment tooltip" type="textarea" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>RSA private key</label>  
-                    <comment>Copy and paste your private key here with: "cat /path/to/your/private-key.pem | pbcopy".</comment>                  
+                    <comment>Copy and paste in this text box the RSA private key that you generated or provided during the configuration of your Zenkipay account.</comment>                  
                     <tooltip>RSA private key is required to sign tha transactions.</tooltip>
                     <validate>required-entry</validate> 
                 </field>                                                                                                                        
