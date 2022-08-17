@@ -368,7 +368,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
 
         if (!array_key_exists('access_token', $token_result)) {
             $this->logger->error('Zenkipay  - customRequest: Error al obtener access_token');
-            throw new \Exception('Invalid access token');
+            throw new \Exception(__('Invalid access token'));
         }
 
         $headers = ['Accept: */*', 'Content-Type: application/json', 'Authorization: Bearer ' . $token_result['access_token']];
