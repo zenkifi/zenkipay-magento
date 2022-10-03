@@ -345,7 +345,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     public function handleTrackingNumber($data)
     {
         try {
-            $url = $this->api_url;
+            $url = $this->api_url . '/v1/api/tracking';
             $method = 'POST';
 
             $result = $this->customRequest($url, $method, $data);
