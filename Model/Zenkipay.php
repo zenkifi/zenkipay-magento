@@ -36,8 +36,8 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     protected $_canOrder = true;
     protected $_canCapture = true;
     protected $_canCapturePartial = true;
-    protected $_canRefund = false;
-    protected $_canRefundInvoicePartial = false;
+    protected $_canRefund = true;
+    protected $_canRefundInvoicePartial = true;
     protected $_canAuthorize = true;
     protected $_canVoid = true;
     protected $_isOffline = true;
@@ -390,5 +390,47 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         curl_close($ch);
 
         return $result;
+    }
+
+    /**
+    * Refund capture
+    *
+    * @param \Magento\Framework\DataObject|\Magento\Payment\Model\InfoInterface|Payment $payment
+    * @param float $amount
+    * @return $this
+    * @throws \Magento\Framework\Exception\LocalizedException
+    */
+    public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount) {
+        $order = $payment->getOrder();
+        $orderId = $order->getId();
+        $trx_id = $order->getExtOrderId();
+        $customer_id = $order->getExtCustomerId();
+        $url = $this->api_url . '/v1/api/disputes';
+        $method = 'POST';
+
+        $this->logger->debug('#refund', array('$trx_id' => $trx_id, '$customer_id' => $customer_id, '$order_id' => $order->getIncrementId(), '$status' => $order->getStatus(), '$amount' => $amount));
+
+        if ($amount <= 0) {
+            throw new \Magento\Framework\Exception\LocalizedException(__('Invalid amount for refund.'));
+        }
+
+        try {
+            $data = json_encode([
+                'title' => 'Magento refund request #'.$orderId,
+                'description' => 'Refund request originated by Magento.',
+                'orderId' => $trx_id
+            ]);
+
+            $result = $this->customRequest($url, $method, $data);
+
+            $this->logger->info('Zenkipay - refund => ' . json_encode($data));
+            $this->logger->info('Zenkipay - refund => ' . $url);
+            $this->logger->info('Zenkipay - refund => ' . $result);
+
+        } catch (\Exception $e) {
+            throw new \Magento\Framework\Exception\LocalizedException(__($e->getMessage()));
+        }
+
+        return $this;
     }
 }
