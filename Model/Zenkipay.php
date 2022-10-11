@@ -433,4 +433,52 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
 
         return $this;
     }
+
+    /**
+     * Get Merchan Info
+     *
+     * @return array
+     */
+    public function getMerchanInfo()
+    {
+        $method = 'GET';
+        $url = $this->base_url . '/v1/merchants/plugin?pluginKey='.$this->pk;
+        $result = $this->customRequest($url, $method, null);
+
+        return json_decode($result, true);
+    }
+
+    /**
+    * Decrypt message with RSA private key
+    *
+    * @param  base64_encoded string holds the encrypted message.
+    * @param  integer $chunk_size Chunking by bytes to feed to the decryptor algorithm (512).
+    *
+    * @return String decrypted message.
+    */
+    public function RSADecyrpt($encrypted_msg)
+    {
+        $ppk = openssl_pkey_get_private($this->rsa_private_key);
+        $encrypted_msg = base64_decode($encrypted_msg);
+
+        // Decrypt the data in the small chunks
+        $a_key = openssl_pkey_get_details($ppk);
+        $chunk_size = ceil($a_key['bits'] / 8);
+
+        $offset = 0;
+        $decrypted = '';
+
+        while ($offset < strlen($encrypted_msg)) {
+            $decrypted_chunk = '';
+            $chunk = substr($encrypted_msg, $offset, $chunk_size);
+
+            if (openssl_private_decrypt($chunk, $decrypted_chunk, $ppk)) {
+                $decrypted .= $decrypted_chunk;
+            } else {
+                throw new Exception('Problem decrypting the message');
+            }
+            $offset += $chunk_size;
+        }
+        return $decrypted;
+    }
 }
