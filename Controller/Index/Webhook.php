@@ -93,8 +93,10 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
             $quote->setCustomDiscount(-$total_discount);
             $order->setDiscountAmount(-$total_discount);
             
-            $new_description = $order->getDiscountDescription().' + Cripto Love';
-            $order->setDiscountDescription($new_description);
+            if ($discount > 0) {
+                $new_description = $order->getDiscountDescription().' + Cripto Love';
+                $order->setDiscountDescription($new_description);
+            }
 
             $status = \Magento\Sales\Model\Order::STATE_PROCESSING;
             $order->setState($status)->setStatus($status);
