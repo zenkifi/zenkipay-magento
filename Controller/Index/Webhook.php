@@ -75,9 +75,28 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $order = $objectManager->create('\Magento\Sales\Model\OrderRepository')->get($payment->merchantOrderId);
 
+            /** @var  Total $total */
+            $total = $objectManager->create(Total::class);
+            $quote = $objectManager->create(Quote::class);
+            
+            $grandTotal = $order->getGrandTotal();
+            $discount = $payment->cryptoLoveFiatAmount;
+            $totalWithDiscount = $grandTotal-$discount;
+            
+            $total->addTotalAmount('customdiscount', -$discount);
+            $total->addBaseTotalAmount('customdiscount', -$discount);
+            $total->setBaseGrandTotal($total->getBaseGrandTotal() - $discount);
+            $total_discount = $discount+(-1 * $order->getDiscountAmount());
+            $quote->setCustomDiscount(-$total_discount);
+            $order->setDiscountAmount(-$total_discount);
+            
+            $new_description = $order->getDiscountDescription().' + Cripto Love';
+            $order->setDiscountDescription($new_description);
+
             $status = \Magento\Sales\Model\Order::STATE_PROCESSING;
             $order->setState($status)->setStatus($status);
-            $order->setTotalPaid($payment->totalAmount);
+            $order->setGrandTotal($totalWithDiscount);
+            $order->setTotalPaid($totalWithDiscount);
             $order->addStatusHistoryComment(__('Payment received successfully'))->setIsCustomerNotified(true);
             $order->setExtOrderId($payment->orderId);
             $order->save();
