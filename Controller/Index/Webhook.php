@@ -62,14 +62,14 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
             $json = $wh->verify($payload, $svix_headers);
 
             if (!($decrypted_data = $this->zenkipay->RSADecyrpt($json['encryptedData']))) {
-                throw new Exception('Unable to decrypt data.');
+                throw new \Exception(__('Unable to decrypt data.'));
             }
 
             $event = json_decode($decrypted_data);
             $payment = $event->eventDetails;
 
             if ($payment->transactionStatus != 'COMPLETED' || !$payment->merchantOrderId) {
-                throw new Exception('Transaction status is no tcompleted or merchantOrderId is empty.');
+                throw new \Exception(__('Transaction status is no tcompleted or merchantOrderId is empty.'));
             }
 
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();

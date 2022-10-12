@@ -31,6 +31,8 @@ class ZenkipayConfigProvider implements ConfigProviderInterface
 
     protected $currentCurrency;
 
+    protected $purchase_data_version = 'v1.1.0';
+
     /**
      * @param PaymentHelper $paymentHelper
      * @param Zenkipay $payment
@@ -70,6 +72,8 @@ class ZenkipayConfigProvider implements ConfigProviderInterface
                 $discount = $totalItemsAmount - $quote->getSubtotalWithDiscount();
 
                 $purchase_data = [
+                    'version' => $this->purchase_data_version,
+                    'zenkipayKey' => $this->payment->getPublicKey(),
                     'shopperEmail' => $quote->getCustomerEmail(),
                     'items' => $items,
                     'shopperCarId' => $quote->getId(),

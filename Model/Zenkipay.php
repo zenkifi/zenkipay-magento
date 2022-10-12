@@ -452,7 +452,6 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     * Decrypt message with RSA private key
     *
     * @param  base64_encoded string holds the encrypted message.
-    * @param  integer $chunk_size Chunking by bytes to feed to the decryptor algorithm (512).
     *
     * @return String decrypted message.
     */
@@ -475,7 +474,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
             if (openssl_private_decrypt($chunk, $decrypted_chunk, $ppk)) {
                 $decrypted .= $decrypted_chunk;
             } else {
-                throw new Exception('Problem decrypting the message');
+                throw new \Exception(__('Problem decrypting the message'));
             }
             $offset += $chunk_size;
         }
