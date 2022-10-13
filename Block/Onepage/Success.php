@@ -20,6 +20,8 @@ class Success extends \Magento\Checkout\Block\Onepage\Success
 {
     protected $orderItemsDetails;
 
+    protected $purchase_data_version = 'v1.1.0';
+
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Checkout\Model\Session $checkoutSession,
@@ -54,6 +56,8 @@ class Success extends \Magento\Checkout\Block\Onepage\Success
         $subtotalAmount = $shipmentAmount + $totalItemsAmount;
 
         $purchase_data = [
+            'version' => $this->purchase_data_version,
+            'zenkipayKey' => $this->payment->getPublicKey(),
             'shopperEmail' => $order->getCustomerEmail(),
             'items' => $items,
             'merchantOrderId' => $order->getId(),
@@ -63,7 +67,7 @@ class Success extends \Magento\Checkout\Block\Onepage\Success
                 'shipmentAmount' => round($shipmentAmount, 2), // without taxes
                 'subtotalAmount' => round($subtotalAmount, 2), // without taxes
                 'taxesAmount' => round($order->getTaxAmount(), 2),
-                'discountAmount' => round($order->getDiscountAmount(), 2),
+                'discountAmount' => abs(round($order->getDiscountAmount(), 2)),
                 'grandTotalAmount' => round($order->getBaseGrandTotal(), 2),
                 'localTaxesAmount' => 0,
                 'importCosts' => 0,

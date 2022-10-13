@@ -17,12 +17,5 @@
                 <item name="zenki_zenkipay" xsi:type="const">Zenki\Zenkipay\Model\Zenkipay::CODE</item>
             </argument>
         </arguments>
-    </virtualType>    
-    <type name="Magento\Checkout\Model\CompositeConfigProvider">
-        <arguments>
-            <argument name="configProviders" xsi:type="array">
-                <item name="zenki_zenkipay_config_provider" xsi:type="object">Zenki\Zenkipay\Model\ZenkipayConfigProvider</item>
-            </argument>
-        </arguments>
-    </type>    
+    </virtualType>  
 </config>

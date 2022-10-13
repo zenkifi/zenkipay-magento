@@ -36,8 +36,8 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     protected $_canOrder = true;
     protected $_canCapture = true;
     protected $_canCapturePartial = true;
-    protected $_canRefund = false;
-    protected $_canRefundInvoicePartial = false;
+    protected $_canRefund = true;
+    protected $_canRefundInvoicePartial = true;
     protected $_canAuthorize = true;
     protected $_canVoid = true;
     protected $_isOffline = true;
@@ -390,5 +390,94 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         curl_close($ch);
 
         return $result;
+    }
+
+    /**
+    * Refund capture
+    *
+    * @param \Magento\Framework\DataObject|\Magento\Payment\Model\InfoInterface|Payment $payment
+    * @param float $amount
+    * @return $this
+    * @throws \Magento\Framework\Exception\LocalizedException
+    */
+    public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount) {
+        $order = $payment->getOrder();
+        $orderId = $order->getId();
+        $trx_id = $order->getExtOrderId();
+        $customer_id = $order->getExtCustomerId();
+        $url = $this->api_url . '/v1/api/disputes';
+        $method = 'POST';
+
+        $this->logger->debug('#refund', array('$trx_id' => $trx_id, '$customer_id' => $customer_id, '$order_id' => $order->getIncrementId(), '$status' => $order->getStatus(), '$amount' => $amount));
+
+        if ($amount <= 0) {
+            throw new \Magento\Framework\Exception\LocalizedException(__('Invalid amount for refund.'));
+        }
+
+        try {
+            $data = json_encode([
+                'title' => 'Magento refund request #'.$orderId,
+                'description' => 'Refund request originated by Magento.',
+                'orderId' => $trx_id
+            ]);
+
+            $result = $this->customRequest($url, $method, $data);
+
+            $this->logger->info('Zenkipay - refund => ' . json_encode($data));
+            $this->logger->info('Zenkipay - refund => ' . $url);
+            $this->logger->info('Zenkipay - refund => ' . $result);
+
+        } catch (\Exception $e) {
+            throw new \Magento\Framework\Exception\LocalizedException(__($e->getMessage()));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get Merchan Info
+     *
+     * @return array
+     */
+    public function getMerchanInfo()
+    {
+        $method = 'GET';
+        $url = $this->base_url . '/v1/merchants/plugin?pluginKey='.$this->pk;
+        $result = $this->customRequest($url, $method, null);
+
+        return json_decode($result, true);
+    }
+
+    /**
+    * Decrypt message with RSA private key
+    *
+    * @param  base64_encoded string holds the encrypted message.
+    *
+    * @return String decrypted message.
+    */
+    public function RSADecyrpt($encrypted_msg)
+    {
+        $ppk = openssl_pkey_get_private($this->rsa_private_key);
+        $encrypted_msg = base64_decode($encrypted_msg);
+
+        // Decrypt the data in the small chunks
+        $a_key = openssl_pkey_get_details($ppk);
+        $chunk_size = ceil($a_key['bits'] / 8);
+
+        $offset = 0;
+        $decrypted = '';
+
+        while ($offset < strlen($encrypted_msg)) {
+            $decrypted_chunk = '';
+            $chunk = substr($encrypted_msg, $offset, $chunk_size);
+
+            if (openssl_private_decrypt($chunk, $decrypted_chunk, $ppk)) {
+                $decrypted .= $decrypted_chunk;
+            } else {
+                throw new \Exception(__('Problem decrypting the message'));
+            }
+            $offset += $chunk_size;
+        }
+        return $decrypted;
     }
 }

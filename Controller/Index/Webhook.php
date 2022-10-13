@@ -15,6 +15,9 @@ use Zenki\Zenkipay\Model\Zenkipay;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Quote\Model\Quote\Address\Total;
+use Magento\Quote\Model\Quote;
+use Magento\TestFramework\Utility\ChildrenClassesSearch\E;
 
 /**
  * Webhook class
@@ -61,27 +64,53 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
             $wh = new \Svix\Webhook($secret);
             $json = $wh->verify($payload, $svix_headers);
 
-            if ($json['transactionStatus'] != 'COMPLETED') {
-                return;
+            if (!($decrypted_data = $this->zenkipay->RSADecyrpt($json['encryptedData']))) {
+                throw new \Exception(__('Unable to decrypt data.'));
             }
 
-            if (isset($json['merchantOrderId'])) {
-                $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-                $order = $objectManager->create('\Magento\Sales\Model\OrderRepository')->get($json['merchantOrderId']);
+            $event = json_decode($decrypted_data);
+            $payment = $event->eventDetails;
 
-                $status = \Magento\Sales\Model\Order::STATE_PROCESSING;
-                $order->setState($status)->setStatus($status);
-                $order->setTotalPaid($json['totalAmount']);
-                $order->addStatusHistoryComment(__('Payment received successfully'))->setIsCustomerNotified(true);
-                $order->setExtOrderId($json['orderId']);
-                $order->save();
-
-                $invoice = $this->invoiceService->prepareInvoice($order);
-                $invoice->setTransactionId($json['orderId']);
-                $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
-                $invoice->register();
-                $invoice->save();
+            if ($payment->transactionStatus != 'COMPLETED' || !$payment->merchantOrderId) {
+                throw new \Exception(__('Transaction status is no tcompleted or merchantOrderId is empty.'));
             }
+
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $order = $objectManager->create('\Magento\Sales\Model\OrderRepository')->get($payment->merchantOrderId);
+
+            /** @var  Total $total */
+            $total = $objectManager->create(Total::class);
+            $quote = $objectManager->create(Quote::class);
+            
+            $grandTotal = $order->getGrandTotal();
+            $discount = $payment->cryptoLoveFiatAmount;
+            $totalWithDiscount = $grandTotal-$discount;
+            
+            $total->addTotalAmount('customdiscount', -$discount);
+            $total->addBaseTotalAmount('customdiscount', -$discount);
+            $total->setBaseGrandTotal($total->getBaseGrandTotal() - $discount);
+            $total_discount = $discount+(-1 * $order->getDiscountAmount());
+            $quote->setCustomDiscount(-$total_discount);
+            $order->setDiscountAmount(-$total_discount);
+            
+            if ($discount > 0) {
+                $new_description = $order->getDiscountDescription().' + Cripto Love';
+                $order->setDiscountDescription($new_description);
+            }
+
+            $status = \Magento\Sales\Model\Order::STATE_PROCESSING;
+            $order->setState($status)->setStatus($status);
+            $order->setGrandTotal($totalWithDiscount);
+            $order->setTotalPaid($totalWithDiscount);
+            $order->addStatusHistoryComment(__('Payment received successfully'))->setIsCustomerNotified(true);
+            $order->setExtOrderId($payment->orderId);
+            $order->save();
+
+            $invoice = $this->invoiceService->prepareInvoice($order);
+            $invoice->setTransactionId($payment->orderId);
+            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
+            $invoice->register();
+            $invoice->save();
         } catch (\Exception $e) {
             header('HTTP/1.1 500 Internal Server Error');
             echo json_encode(['error' => true, 'msg' => $e->getMessage()]);
