@@ -69,10 +69,9 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
         $this->logger->info('Zenkipay - $payload => ' . $payload);
 
         try {
-            // $secret = $this->zenkipay->getWebhookSigningSecret();
-            // $wh = new \Svix\Webhook($secret);
-            // $json = $wh->verify($payload, $svix_headers);
-            $json = json_decode($payload, true);
+            $secret = $this->zenkipay->getWebhookSigningSecret();
+            $wh = new \Svix\Webhook($secret);
+            $json = $wh->verify($payload, $svix_headers);            
             $payment = json_decode($json['flatData']);
 
             if ($payment->paymentInfo->cryptoPayment->transactionStatus != 'COMPLETED') {
