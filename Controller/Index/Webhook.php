@@ -17,7 +17,6 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Quote\Model\Quote\Address\Total;
 use Magento\Quote\Model\Quote;
-use Magento\TestFramework\Utility\ChildrenClassesSearch\E;
 
 /**
  * Webhook class
@@ -28,14 +27,22 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
     protected $payment;
     protected $logger;
     protected $invoiceService;
+    protected $salesOrder;
 
-    public function __construct(Context $context, \Magento\Framework\App\Request\Http $request, Zenkipay $zenkipay, \Psr\Log\LoggerInterface $logger_interface, \Magento\Sales\Model\Service\InvoiceService $invoiceService)
-    {
+    public function __construct(
+        Context $context,
+        \Magento\Framework\App\Request\Http $request,
+        Zenkipay $zenkipay,
+        \Psr\Log\LoggerInterface $logger_interface,
+        \Magento\Sales\Model\Service\InvoiceService $invoiceService,
+        \Magento\Sales\Model\ResourceModel\Sale\Collection $salesOrder
+    ) {
         parent::__construct($context);
         $this->request = $request;
         $this->zenkipay = $zenkipay;
         $this->logger = $logger_interface;
         $this->invoiceService = $invoiceService;
+        $this->salesOrder = $salesOrder;
     }
 
     /**
@@ -59,42 +66,52 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
             $svix_headers[$header] = $value;
         }
 
+        $this->logger->info('Zenkipay - $payload => ' . $payload);
+
         try {
-            $secret = $this->zenkipay->getWebhookSigningSecret();
-            $wh = new \Svix\Webhook($secret);
-            $json = $wh->verify($payload, $svix_headers);
+            // $secret = $this->zenkipay->getWebhookSigningSecret();
+            // $wh = new \Svix\Webhook($secret);
+            // $json = $wh->verify($payload, $svix_headers);
+            $json = json_decode($payload, true);
+            $payment = json_decode($json['flatData']);
 
-            if (!($decrypted_data = $this->zenkipay->RSADecyrpt($json['encryptedData']))) {
-                throw new \Exception(__('Unable to decrypt data.'));
+            if ($payment->paymentInfo->cryptoPayment->transactionStatus != 'COMPLETED') {
+                header('HTTP/1.1 400 Bad Request');
+                header('Content-type: application/json');
+                echo json_encode(['error' => true, 'message' => 'Transaction status is not completed.']);
+                exit();
             }
 
-            $event = json_decode($decrypted_data);
-            $payment = $event->eventDetails;
-
-            if ($payment->transactionStatus != 'COMPLETED' || !$payment->merchantOrderId) {
-                throw new \Exception(__('Transaction status is no tcompleted or merchantOrderId is empty.'));
+            $loadorder = $this->salesOrder->addFieldToFilter('quote_id', $payment->cartId);
+            if (!count($loadorder->getData())) {
+                header('HTTP/1.1 404 Not Found');
+                header('Content-type: application/json');
+                echo json_encode(['error' => true, 'message' => 'Order with Quote ID:' . $payment->cartId . ' was not found.']);
+                exit();
             }
 
+            $incrementId = $loadorder->getData()[0]['increment_id'];
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $order = $objectManager->create('\Magento\Sales\Model\OrderRepository')->get($payment->merchantOrderId);
+            $collection = $objectManager->create('\Magento\Sales\Model\Order');
+            $order = $collection->loadByIncrementId($incrementId);
 
             /** @var  Total $total */
             $total = $objectManager->create(Total::class);
             $quote = $objectManager->create(Quote::class);
-            
+
             $grandTotal = $order->getGrandTotal();
-            $discount = $payment->cryptoLoveFiatAmount;
-            $totalWithDiscount = $grandTotal-$discount;
-            
-            $total->addTotalAmount('customdiscount', -$discount);
-            $total->addBaseTotalAmount('customdiscount', -$discount);
-            $total->setBaseGrandTotal($total->getBaseGrandTotal() - $discount);
-            $total_discount = $discount+(-1 * $order->getDiscountAmount());
-            $quote->setCustomDiscount(-$total_discount);
-            $order->setDiscountAmount(-$total_discount);
-            
-            if ($discount > 0) {
-                $new_description = $order->getDiscountDescription().' + Cripto Love';
+            $zenkipayDiscount = $payment->paymentInfo->cryptoLove->discountAmount;
+            $totalWithDiscount = $grandTotal - $zenkipayDiscount;
+            $totalDiscount = $zenkipayDiscount + abs($order->getDiscountAmount());
+
+            $total->addTotalAmount('customdiscount', -$zenkipayDiscount);
+            $total->addBaseTotalAmount('customdiscount', -$zenkipayDiscount);
+            $total->setBaseGrandTotal($total->getBaseGrandTotal() - $zenkipayDiscount);
+            $quote->setCustomDiscount(-$totalDiscount);
+            $order->setDiscountAmount(-$totalDiscount);
+
+            if ($zenkipayDiscount > 0) {
+                $new_description = $order->getDiscountDescription() . ' + Cripto Love';
                 $order->setDiscountDescription($new_description);
             }
 
@@ -103,21 +120,30 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
             $order->setGrandTotal($totalWithDiscount);
             $order->setTotalPaid($totalWithDiscount);
             $order->addStatusHistoryComment(__('Payment received successfully'))->setIsCustomerNotified(true);
-            $order->setExtOrderId($payment->orderId);
+            $order->setExtOrderId($payment->zenkiOrderId);
             $order->save();
 
+            // $status = \Magento\Sales\Model\Order::STATE_PROCESSING;
+            // $order->setState($status)->setStatus($status);
+            // $order->setTotalPaid($payment->grandTotalAmount);
+            // $order->addStatusHistoryComment(__('Payment received successfully'))->setIsCustomerNotified(true);
+            // $order->setExtOrderId($payment->zenkiOrderId);
+            // $order->save();
+
             $invoice = $this->invoiceService->prepareInvoice($order);
-            $invoice->setTransactionId($payment->orderId);
+            $invoice->setTransactionId($payment->zenkiOrderId);
             $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
             $invoice->register();
             $invoice->save();
         } catch (\Exception $e) {
             header('HTTP/1.1 500 Internal Server Error');
-            echo json_encode(['error' => true, 'msg' => $e->getMessage()]);
+            header('Content-type: application/json');
+            echo json_encode(['error' => true, 'message' => $e->getMessage()]);
             exit();
         }
 
         header('HTTP/1.1 200 OK');
+        header('Content-type: application/json');
         echo json_encode(['success' => true]);
         exit();
     }

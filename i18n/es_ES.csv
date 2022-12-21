@@ -6,14 +6,12 @@
 Zenkipay,Zenkipay
 Enabled,Habilitado
 "Test mode","Modo de prueba"
-"Sandbox Zenkipay key","Llave de sandbox de Zenkipay"
-"Production Zenkipay key","Llave de producción de Zenkipay"
+"Client ID","Client ID"
+"Client secret","Client secret"
+"You must change this value if you switch your environment from production to testing.","Debe cambiar este valor si cambia su entorno de producción a prueba."
 "Webhook signing secret","Firma secreta del webhook"
 "You can get this secret from your Zenkipay Dashboard: Configurations > Webhooks.","Puedes obtener esta firma secreta del Dashboard de Zenkipay: Configuración > Webhooks."
 "Signing secret is required to confirm the orders.","La firma secreta es requerida para confirmar los pedidos."
-"RSA private key","Llave privada RSA"
-"Copy and paste in this text box the RSA private key that you generated or provided during the configuration of your Zenkipay account.","Copia y pega en esta caja de texto la llave privada RSA que generaste o proporcionaste durante la configuración de tu cuenta de Zenkipay."
-"RSA private key is required to sign tha transactions.","La llave privada RSA es requerida para firmar las transacciones."
 "Payment from Applicable Countries","Pago desde países aplicables"
 "Payment from Specific Countries","Pago desde países específicos"
 "Sort Order","Orden"

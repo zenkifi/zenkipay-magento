@@ -42,10 +42,8 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     protected $_canVoid = true;
     protected $_isOffline = true;
     protected $is_sandbox;
-    protected $pk;
-    protected $sandbox_pk;
-    protected $live_pk;
-    protected $base_url;
+    protected $api_key;
+    protected $secret_key;
     protected $api_url;
     protected $scopeConfig;
     protected $logger;
@@ -100,21 +98,18 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
 
         $this->is_active = $this->getConfigData('active');
         $this->is_sandbox = $this->getConfigData('is_sandbox');
-        $this->sandbox_pk = $this->getConfigData('sandbox_pk');
-        $this->live_pk = $this->getConfigData('live_pk');
-        $this->rsa_private_key = $this->getConfigData('rsa_private_key');
+        $this->api_key = $this->getConfigData('api_key');
+        $this->secret_key = $this->getConfigData('secret_key');
         $this->webhook_signing_secret = $this->getConfigData('webhook_signing_secret');
-        $this->pk = $this->is_sandbox ? $this->sandbox_pk : $this->live_pk;
-        $this->base_url = 'https://prod-gateway.zenki.fi';
-        $this->api_url = 'https://api.zenki.fi';
     }
 
     /**
+     * Order payment abstract method
      *
-     * @param \Magento\Payment\Model\InfoInterface $payment
+     * @param \Magento\Framework\DataObject|InfoInterface $payment
      * @param float $amount
-     * @return \Openpay\Stores\Model\Payment
-     * @throws \Magento\Framework\Validator\Exception
+     * @return $this
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function order(\Magento\Payment\Model\InfoInterface $payment, $amount)
     {
@@ -166,9 +161,17 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     /**
      * @return string
      */
-    public function getPublicKey()
+    public function getApiKey()
     {
-        return $this->pk;
+        return $this->api_key;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSecretKey()
+    {
+        return $this->secret_key;
     }
 
     /**
@@ -177,14 +180,6 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     public function isSandbox()
     {
         return $this->is_sandbox;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRsaPrivateKey()
-    {
-        return $this->rsa_private_key;
     }
 
     /**
@@ -204,7 +199,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     }
 
     /**
-     * Validates keys (plugin and RSA)
+     * Validates keys
      *
      * @return \Exception|void
      */
@@ -212,147 +207,45 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     {
         $response = $this->validateZenkipayKey();
         if (!$response) {
-            throw new \Magento\Framework\Validator\Exception(__('Something went wrong while saving this configuration, your Zenkipay key is incorrect.'));
-        }
-
-        if (!$this->validateRSAPrivateKey($this->rsa_private_key)) {
-            throw new \Magento\Framework\Validator\Exception(__('Invalid RSA private key has been provided.'));
+            throw new \Magento\Framework\Validator\Exception(__("Your credentials are incorrect or don't match with selected environment."));
         }
 
         return;
     }
 
     /**
-     * Checks if the plain RSA private key is valid
-     *
-     * @param string $plain_rsa_private_key Plain RSA private key
-     *
-     * @return boolean
-     */
-    protected function validateRSAPrivateKey($plain_rsa_private_key)
-    {
-        try {
-            if (empty($plain_rsa_private_key)) {
-                return false;
-            }
-
-            $private_key = openssl_pkey_get_private($plain_rsa_private_key);
-            if (!is_resource($private_key) && !is_object($private_key)) {
-                return false;
-            }
-
-            $public_key = openssl_pkey_get_details($private_key);
-            if (is_array($public_key) && isset($public_key['key'])) {
-                return true;
-            }
-
-            return false;
-        } catch (\Exception $e) {
-            $this->logger->error('Zenkipay - validateRSAPrivateKey: ', ['msg' => $e->getMessage(), 'traceAsString' => $e->getTraceAsString()]);
-            return false;
-        }
-    }
-
-    /**
-     * Checks if the Zenkipay key is valid
+     * Checks if the Zenkipay credentials are valid
      *
      * @return boolean
      */
     protected function validateZenkipayKey()
     {
-        $result = $this->getAccessToken();
-        if (array_key_exists('access_token', $result)) {
-            return true;
-        }
+        $zenkipay = new \Zenkipay\Sdk($this->api_key, $this->secret_key);
+        $result = $zenkipay->getAccessToken();
 
-        return false;
-    }
+        $this->logger->info('Zenkipay - getAccessToken => ' . $result);
 
-    /**
-     * Get Zenkipay access token
-     *
-     * @return array
-     */
-    protected function getAccessToken()
-    {
-        $url = $this->base_url . '/public/v1/merchants/plugin/token';
-
-        $ch = curl_init();
-        $payload = $this->pk;
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type:text/plain']);
-
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        $result = curl_exec($ch);
-
-        if ($result === false) {
-            $this->logger->error('Curl error', ['curl_errno' => curl_errno($ch), 'curl_error' => curl_error($ch)]);
-            return [];
-        }
-
-        curl_close($ch);
-
-        return json_decode($result, true);
-    }
-
-    /**
-     * Updates Zenkipay's merchantOrderId after WooCommerce register the order
-     *
-     * @param mixed $zenkipay_order_id
-     * @param mixed $order_id
-     *
-     * @return boolean
-     */
-    protected function updateZenkipayOrder($zenkipay_order_id, $order_id)
-    {
-        try {
-            $token_result = $this->getAccessToken();
-            if (!array_key_exists('access_token', $token_result)) {
-                $this->logger->error('Zenkipay - updateZenkipayOrder: Error al obtener access_token');
-                return false;
-            }
-
-            $zenkipay_key = $this->pk;
-            $payload = json_encode(['zenkipayKey' => $zenkipay_key, 'merchantOrderId' => $order_id]);
-            $url = $this->base_url . '/v1/orders/' . $zenkipay_order_id;
-            $headers = ['Accept: */*', 'Content-Type: application/json', 'Authorization: Bearer ' . $token_result['access_token']];
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-            $result = curl_exec($ch);
-
-            if ($result === false) {
-                $this->logger->error('Curl error ' . curl_errno($ch) . ': ' . curl_error($ch));
-                return false;
-            }
-
-            curl_close($ch);
-
-            return true;
-        } catch (\Exception $e) {
-            $this->logger->error('Zenkipay - updateZenkipayOrder: ', ['msg' => $e->getMessage(), 'traceAsString' => $e->getTraceAsString()]);
+        // Se valida que la respuesta sea un JWT
+        $regex = preg_match('/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-\+\/=]*)/', $result);
+        if ($regex != 1) {
             return false;
         }
+
+        $merchant = $zenkipay->merchants()->me();
+        if ($merchant->apiEnvironment == 'DEV' && !$this->is_sandbox) {
+            return false;
+        }
+
+        return true;
     }
 
-    public function handleTrackingNumber($data)
+    public function handleTrackingNumber($zenki_order_id, $data)
     {
         try {
-            $url = $this->api_url . '/v1/api/tracking';
-            $method = 'POST';
-
-            $result = $this->customRequest($url, $method, $data);
-
             $this->logger->info('Zenkipay - handleTrackingNumber => ' . json_encode($data));
-            $this->logger->info('Zenkipay - handleTrackingNumber => ' . $url);
-            $this->logger->info('Zenkipay - handleTrackingNumber => ' . $result);
+
+            $zenkipay = new \Zenkipay\Sdk($this->api_key, $this->secret_key);
+            $zenkipay->trackingNumbers()->create($zenki_order_id, $data);
 
             return true;
         } catch (\Exception $e) {
@@ -361,123 +254,34 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         }
     }
 
-    protected function customRequest($url, $method, $data)
-    {
-        $token_result = $this->getAccessToken();
-        $this->logger->info('Zenkipay - customRequest => ' . json_encode($token_result));
-
-        if (!array_key_exists('access_token', $token_result)) {
-            $this->logger->error('Zenkipay  - customRequest: Error al obtener access_token');
-            throw new \Exception(__('Invalid access token'));
-        }
-
-        $headers = ['Accept: */*', 'Content-Type: application/json', 'Authorization: Bearer ' . $token_result['access_token']];
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-        $result = curl_exec($ch);
-
-        if ($result === false) {
-            $this->logger->error('Curl error ' . curl_errno($ch) . ': ' . curl_error($ch));
-            throw new \Exception(curl_error($ch));
-        }
-
-        curl_close($ch);
-
-        return $result;
-    }
-
     /**
-    * Refund capture
-    *
-    * @param \Magento\Framework\DataObject|\Magento\Payment\Model\InfoInterface|Payment $payment
-    * @param float $amount
-    * @return $this
-    * @throws \Magento\Framework\Exception\LocalizedException
-    */
-    public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount) {
+     * Refund capture
+     *
+     * @param \Magento\Framework\DataObject|\Magento\Payment\Model\InfoInterface|Payment $payment
+     * @param float $amount
+     * @return $this
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    {
         $order = $payment->getOrder();
-        $orderId = $order->getId();
-        $trx_id = $order->getExtOrderId();
-        $customer_id = $order->getExtCustomerId();
-        $url = $this->api_url . '/v1/api/disputes';
-        $method = 'POST';
-
-        $this->logger->debug('#refund', array('$trx_id' => $trx_id, '$customer_id' => $customer_id, '$order_id' => $order->getIncrementId(), '$status' => $order->getStatus(), '$amount' => $amount));
+        $zenki_order_id = $order->getExtOrderId();
 
         if ($amount <= 0) {
             throw new \Magento\Framework\Exception\LocalizedException(__('Invalid amount for refund.'));
         }
 
         try {
-            $data = json_encode([
-                'title' => 'Magento refund request #'.$orderId,
-                'description' => 'Refund request originated by Magento.',
-                'orderId' => $trx_id
-            ]);
-
-            $result = $this->customRequest($url, $method, $data);
+            $data = ['reason' => 'Refund request originated by Magento.'];
+            $zenkipay = new \Zenkipay\Sdk($this->api_key, $this->secret_key);
+            $result = $zenkipay->refunds()->create($zenki_order_id, $data);
 
             $this->logger->info('Zenkipay - refund => ' . json_encode($data));
-            $this->logger->info('Zenkipay - refund => ' . $url);
             $this->logger->info('Zenkipay - refund => ' . $result);
-
         } catch (\Exception $e) {
             throw new \Magento\Framework\Exception\LocalizedException(__($e->getMessage()));
         }
 
         return $this;
-    }
-
-    /**
-     * Get Merchan Info
-     *
-     * @return array
-     */
-    public function getMerchanInfo()
-    {
-        $method = 'GET';
-        $url = $this->base_url . '/v1/merchants/plugin?pluginKey='.$this->pk;
-        $result = $this->customRequest($url, $method, null);
-
-        return json_decode($result, true);
-    }
-
-    /**
-    * Decrypt message with RSA private key
-    *
-    * @param  base64_encoded string holds the encrypted message.
-    *
-    * @return String decrypted message.
-    */
-    public function RSADecyrpt($encrypted_msg)
-    {
-        $ppk = openssl_pkey_get_private($this->rsa_private_key);
-        $encrypted_msg = base64_decode($encrypted_msg);
-
-        // Decrypt the data in the small chunks
-        $a_key = openssl_pkey_get_details($ppk);
-        $chunk_size = ceil($a_key['bits'] / 8);
-
-        $offset = 0;
-        $decrypted = '';
-
-        while ($offset < strlen($encrypted_msg)) {
-            $decrypted_chunk = '';
-            $chunk = substr($encrypted_msg, $offset, $chunk_size);
-
-            if (openssl_private_decrypt($chunk, $decrypted_chunk, $ppk)) {
-                $decrypted .= $decrypted_chunk;
-            } else {
-                throw new \Exception(__('Problem decrypting the message'));
-            }
-            $offset += $chunk_size;
-        }
-        return $decrypted;
     }
 }

@@ -68,9 +68,9 @@ class Tracking implements ObserverInterface
 
             $this->logger->info('Tracking - Carrier: ' . $track->getTitle() . ', code: ' . $track->getTrackNumber());
 
-            $data = [['orderId' => $order->getExtOrderId(), 'merchantOrderId' => $order->getId(), 'trackingId' => $track->getTrackNumber()]];
+            $data = [['courierType' => 'EXTERNAL', 'trackingId' => $track->getTrackNumber()]];
 
-            $this->zenkipay->handleTrackingNumber($data);
+            $this->zenkipay->handleTrackingNumber($order->getExtOrderId(), $data);
         } catch (Exception $e) {
             // otra manera de llamar a error_log():
             $this->logger->error('Tracking: ' . $e->getMessage());
