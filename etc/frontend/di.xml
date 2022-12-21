@@ -10,12 +10,19 @@
  * @license     http://www.apache.org/licenses/LICENSE-2.0  Apache License Version 2.0
  */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">   
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <virtualType name="Zenki\Zenkipay\Model\ConfigProvider" type="Magento\Payment\Model\CcGenericConfigProvider">
         <arguments>
             <argument name="methodCodes" xsi:type="array">
                 <item name="zenki_zenkipay" xsi:type="const">Zenki\Zenkipay\Model\Zenkipay::CODE</item>
             </argument>
         </arguments>
-    </virtualType>  
+    </virtualType>
+    <type name="Magento\Checkout\Model\CompositeConfigProvider">
+        <arguments>
+            <argument name="configProviders" xsi:type="array">
+                <item name="zenki_zenkipay_config_provider" xsi:type="object">Zenki\Zenkipay\Model\ZenkipayConfigProvider</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

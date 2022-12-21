@@ -12,32 +12,24 @@ define(['jquery'], function ($) {
     'use strict';
 
     return function (config, element) {
-        var self = this;
-        var zenkipayKey = config.public_key;
-        var purchaseData = JSON.stringify(config.purchase_data);
-        var purchaseSignature = config.signature;
+        // var self = this;
+        var orderId = config.zenki_order_id;
+        var paymentSignature = config.payment_signature;
 
         var purchaseOptions = {
-            style: {
-                shape: 'square',
-                theme: 'light',
-            },
-            zenkipayKey,
-            purchaseData,
-            purchaseSignature,
+            orderId,
+            paymentSignature,
         };
 
-        zenkiPay.openModal(purchaseOptions, function (error, data, details) {
-            if (!error && details.postMsgType === 'done') {
-                console.log('DONE!');
-                return;
-            }
+        console.log('purchaseOptions', JSON.stringify(purchaseOptions, null, 2));
 
-            if (error && details.postMsgType === 'error') {
+        zenkipay.openModal(purchaseOptions, function (error, data) {
+            if (error) {
                 // self.messageContainer.addErrorMessage({
                 //     message: 'An unexpected error has occurred.',
                 // });
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
             }
 
             return;

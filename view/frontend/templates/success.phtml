@@ -12,9 +12,8 @@
     {
         "*": {
             "Zenki_Zenkipay/js/modal": {
-                "public_key": "<?php echo $zenkipay['public_key']; ?>",
-                "signature": "<?php echo $zenkipay['signature']; ?>",
-                "purchase_data": <?php echo $zenkipay['purchase_data']; ?>
+                "zenki_order_id": "<?php echo $zenkipay['zenki_order_id']; ?>",
+                "payment_signature": "<?php echo $zenkipay['payment_signature']; ?>"
             }
         }
     }
