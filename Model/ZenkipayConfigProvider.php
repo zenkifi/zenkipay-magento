@@ -52,7 +52,7 @@ class ZenkipayConfigProvider implements ConfigProviderInterface
         $config = [];
         foreach ($this->methodCodes as $code) {
             if ($this->methods[$code]->isAvailable()) {
-                $config['payment']['zenkipay']['create_order_url'] = $this->payment->getBaseUrlStore() . 'zenkipay/payment/order';
+                $config['payment']['zenkipay']['create_order_url'] = $this->payment->getBaseUrlStore() . '/zenkipay/payment/order';
             }
         }
 

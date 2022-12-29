@@ -4,27 +4,27 @@
 
          <policy id="script-src">
             <values>
-                <value id="zenki" type="host">*.zenki.fi</value>  
-                <value id="aws-s3" type="host">*.s3.amazonaws.com</value>                                                        
+                <value id="zenki" type="host">*.zenki.fi</value>
+                <value id="aws-s3" type="host">*.s3.amazonaws.com</value>                
             </values>
         </policy>
         <policy id="img-src">
-            <values>                
-                <value id="zenki" type="host">zenki.fi</value>    
-                <value id="resources-zenki" type="host">*.zenki.fi</value>                         
-                <value id="aws-s3" type="host">s3.amazonaws.com</value>                         
+            <values>
+                <value id="zenki" type="host">zenki.fi</value>
+                <value id="resources-zenki" type="host">*.zenki.fi</value>
+                <value id="aws-s3" type="host">s3.amazonaws.com</value>
             </values>
         </policy>
         <policy id="connect-src">
             <values>
-                <value id="zenki" type="host">*.zenki.fi</value>    
-                <value id="ipapi" type="host">ipapi.co</value>                                    
+                <value id="zenki" type="host">*.zenki.fi</value>
+                <value id="ipapi" type="host">ipapi.co</value>
             </values>
-        </policy>    
+        </policy>
         <policy id="frame-src">
-            <values>                
-                <value id="zenki" type="host">*.zenki.fi</value>                          
+            <values>
+                <value id="zenki" type="host">*.zenki.fi</value>
             </values>
-        </policy>                   
+        </policy>
     </policies>
 </csp_whitelist>
