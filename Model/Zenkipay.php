@@ -105,11 +105,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         $this->sync_code = $this->getConfigData('sync_code');
 
         if (!empty($this->sync_code)) {
-            $credentials = $this->getCredentials($this->sync_code);
-            $this->logger->info('Zenkipay - getCredentials __construct => ' . $this->sync_code);
-            $this->api_key = $credentials['api_key'];
-            $this->secret_key = $credentials['secret_key'];
-            $this->webhook_signing_secret = $credentials['whsec'];
+            $this->setCredentials();
         }
     }
 
@@ -380,5 +376,19 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         }
 
         return $this;
+    }
+
+    private function setCredentials()
+    {
+        $credentials = $this->getCredentials($this->sync_code);
+        $this->logger->info('Zenkipay - setCredentials => ' . json_encode($credentials));
+
+        if (!count($credentials)) {
+            return;
+        }
+
+        $this->api_key = $credentials['api_key'];
+        $this->secret_key = $credentials['secret_key'];
+        $this->webhook_signing_secret = $credentials['whsec'];
     }
 }
