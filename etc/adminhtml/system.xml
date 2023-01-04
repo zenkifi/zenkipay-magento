@@ -26,21 +26,10 @@
                     <label>Test mode</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="api_key" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Client ID</label>
+                <field id="sync_code" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sync code</label>
                     <validate>required-entry no-whitespace</validate>
-                    <comment>You must change this value if you switch your environment from production to testing.</comment>
-                </field>
-                <field id="secret_key" translate="label" type="password" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Client secret</label>
-                    <validate>required-entry no-whitespace</validate>
-                    <comment>You must change this value if you switch your environment from production to testing.</comment>
-                </field>
-                <field id="webhook_signing_secret" translate="label comment tooltip" type="password" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Webhook signing secret</label>
-                    <validate>required-entry no-whitespace</validate>
-                    <comment>You can get this secret from your Zenkipay Dashboard: Configurations > Webhooks.</comment>
-                    <tooltip>Signing secret is required to confirm the orders.</tooltip>
+                    <comment>To set up quickly and easily, enter the synchronization code from your Zenkipay portal.</comment>
                 </field>
                 <field id="allowspecific" translate="label" type="allowspecific" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Payment from Applicable Countries</label>

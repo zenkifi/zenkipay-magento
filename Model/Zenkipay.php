@@ -26,6 +26,7 @@ use Magento\Directory\Model\CountryFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 use Magento\Customer\Model\Session as CustomerSession;
+use Zenki\Zenkipay\Model\SyncAccount;
 
 class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
 {
@@ -42,15 +43,16 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     protected $_canVoid = true;
     protected $_isOffline = true;
     protected $is_sandbox;
-    protected $api_key;
-    protected $secret_key;
-    protected $api_url;
+    protected $sync_code;
+    protected $api_key = '';
+    protected $secret_key = '';
+    protected $webhook_signing_secret = '';
     protected $scopeConfig;
     protected $logger;
     protected $_storeManager;
     protected $customerSession;
     protected $configWriter;
-    protected $webhook_signing_secret;
+    protected $zenkipayCredentialsFactory;
 
     /**
      *
@@ -83,10 +85,12 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         CountryFactory $countryFactory,
         LoggerInterface $logger_interface,
         CustomerSession $customerSession,
+        \Zenki\Zenkipay\Model\CredentialsFactory $zenkipayCredentialsFactory,
         array $data = []
     ) {
         parent::__construct($context, $registry, $extensionFactory, $customAttributeFactory, $paymentData, $scopeConfig, $logger, null, null, $data);
 
+        $this->zenkipayCredentialsFactory = $zenkipayCredentialsFactory;
         $this->customerSession = $customerSession;
 
         $this->_storeManager = $storeManager;
@@ -98,9 +102,11 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
 
         $this->is_active = $this->getConfigData('active');
         $this->is_sandbox = $this->getConfigData('is_sandbox');
-        $this->api_key = $this->getConfigData('api_key');
-        $this->secret_key = $this->getConfigData('secret_key');
-        $this->webhook_signing_secret = $this->getConfigData('webhook_signing_secret');
+        $this->sync_code = $this->getConfigData('sync_code');
+
+        if (!empty($this->sync_code)) {
+            $this->setCredentials();
+        }
     }
 
     /**
@@ -136,7 +142,7 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
      */
     public function getBaseUrlStore()
     {
-        return $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_LINK);
+        return rtrim($this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB), '/');
     }
 
     /**
@@ -207,7 +213,8 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     {
         $response = $this->validateZenkipayKey();
         if (!$response) {
-            throw new \Magento\Framework\Validator\Exception(__("Your credentials are incorrect or don't match with selected environment."));
+            $this->deleteCredentials();
+            throw new \Magento\Framework\Validator\Exception(__('An error occurred while syncing the account.'));
         }
 
         return;
@@ -220,7 +227,16 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
      */
     protected function validateZenkipayKey()
     {
-        $zenkipay = new \Zenkipay\Sdk($this->api_key, $this->secret_key);
+        $this->logger->info('Zenkipay - api_key => ' . $this->api_key);
+        $this->logger->info('Zenkipay - secret_key => ' . $this->secret_key);
+        $this->logger->info('Zenkipay - sync_code => ' . $this->sync_code);
+
+        $credentials = $this->getCredentials($this->sync_code);
+        if (!count($credentials)) {
+            return false;
+        }
+
+        $zenkipay = new \Zenkipay\Sdk($credentials['api_key'], $credentials['secret_key']);
         $result = $zenkipay->getAccessToken();
 
         $this->logger->info('Zenkipay - getAccessToken => ' . $result);
@@ -231,12 +247,89 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
             return false;
         }
 
-        $merchant = $zenkipay->merchants()->me();
-        if ($merchant->apiEnvironment == 'DEV' && !$this->is_sandbox) {
-            return false;
-        }
-
         return true;
+    }
+
+    private function getCredentials($sync_code)
+    {
+        $urlStore = $this->getBaseUrlStore();
+        $formmattedCode = trim(str_replace('-', '', $sync_code));
+
+        try {
+            $syncedAccount = $this->getSyncedAccount();
+            $oldSyncCode = count($syncedAccount) ? $syncedAccount['sync_code'] : '';
+
+            $this->logger->info('Zenkipay - formmattedCode => ' . $formmattedCode);
+            $this->logger->info('Zenkipay - oldSyncCode => ' . $oldSyncCode);
+
+            if (!$syncedAccount || $oldSyncCode != $formmattedCode) {
+                $syncAccount = new SyncAccount();
+                $credentials = $syncAccount->sync($formmattedCode, $urlStore);
+
+                if (isset($credentials['errorCode'])) {
+                    throw new \Magento\Framework\Validator\Exception(__($credentials['humanMessage']));
+                }
+
+                // Se valida que la sincronización haya sido exitosa
+                if ($credentials['status'] != 'SYNCHRONIZED') {
+                    throw new \Magento\Framework\Validator\Exception(__('An unexpected error occurred synchronizing the account.'));
+                }
+
+                $this->deleteCredentials();
+
+                // Se guarda en BD la relación
+                $dev_credentials = [
+                    'sync_code' => $formmattedCode,
+                    'api_key' => $credentials['synchronizationAccessData']['sandboxApiAccessData']['apiAccessData']['apiKey'],
+                    'secret_key' => $credentials['synchronizationAccessData']['sandboxApiAccessData']['apiAccessData']['secretKey'],
+                    'whsec' => $credentials['synchronizationAccessData']['sandboxApiAccessData']['webhookAccessData']['signingSecret'],
+                    'env' => 'DEV',
+                ];
+                $dev_cred_factory = $this->zenkipayCredentialsFactory->create();
+                $dev_cred_factory->addData($dev_credentials)->save();
+
+                // Se guarda en BD la relación
+                $prod_credentials = [
+                    'sync_code' => $formmattedCode,
+                    'api_key' => $credentials['synchronizationAccessData']['liveApiAccessData']['apiAccessData']['apiKey'],
+                    'secret_key' => $credentials['synchronizationAccessData']['liveApiAccessData']['apiAccessData']['secretKey'],
+                    'whsec' => $credentials['synchronizationAccessData']['liveApiAccessData']['webhookAccessData']['signingSecret'],
+                    'env' => 'PROD',
+                ];
+                $prod_cred_factory = $this->zenkipayCredentialsFactory->create();
+                $prod_cred_factory->addData($prod_credentials)->save();
+
+                return $this->is_sandbox ? $dev_credentials : $prod_credentials;
+            }
+
+            return $syncedAccount;
+        } catch (\Exception $e) {
+            $this->logger->error('Zenkipay - getCredentials: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    private function getSyncedAccount()
+    {
+        $env = $this->is_sandbox ? 'DEV' : 'PROD';
+        try {
+            $znk_cred = $this->zenkipayCredentialsFactory->create();
+            return $znk_cred->fetchOneBy('env', $env);
+        } catch (\Exception $e) {
+            throw new \Magento\Framework\Validator\Exception(__($e->getMessage()));
+        }
+    }
+
+    private function deleteCredentials()
+    {
+        $this->logger->info('Zenkipay - deleteCredentials');
+        try {
+            $znk_cred = $this->zenkipayCredentialsFactory->create();
+            return $znk_cred->deleteAll();
+        } catch (\Exception $e) {
+            $this->logger->error('Zenkipay - handleTrackingNumber: ' . $e->getMessage());
+            throw new \Magento\Framework\Validator\Exception(__($e->getMessage()));
+        }
     }
 
     public function handleTrackingNumber($zenki_order_id, $data)
@@ -283,5 +376,19 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         }
 
         return $this;
+    }
+
+    private function setCredentials()
+    {
+        $credentials = $this->getCredentials($this->sync_code);
+        $this->logger->info('Zenkipay - setCredentials => ' . json_encode($credentials));
+
+        if (!count($credentials)) {
+            return;
+        }
+
+        $this->api_key = $credentials['api_key'];
+        $this->secret_key = $credentials['secret_key'];
+        $this->webhook_signing_secret = $credentials['whsec'];
     }
 }
