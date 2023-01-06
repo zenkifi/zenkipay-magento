@@ -232,7 +232,8 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         $this->logger->info('Zenkipay - sync_code => ' . $this->sync_code);
 
         $credentials = $this->getCredentials($this->sync_code);
-        if (!count($credentials)) {
+        $this->logger->info('Zenkipay - validateZenkipayKey - $credentials => ' . json_encode($credentials));
+        if ($credentials == false) {
             return false;
         }
 
@@ -257,8 +258,9 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
 
         try {
             $syncedAccount = $this->getSyncedAccount();
-            $oldSyncCode = count($syncedAccount) ? $syncedAccount['sync_code'] : '';
+            $this->logger->info('Zenkipay - syncedAccount => ' . json_encode($syncedAccount));
 
+            $oldSyncCode = !$syncedAccount ? '' : $syncedAccount['sync_code'];
             $this->logger->info('Zenkipay - formmattedCode => ' . $formmattedCode);
             $this->logger->info('Zenkipay - oldSyncCode => ' . $oldSyncCode);
 
@@ -266,13 +268,15 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
                 $syncAccount = new SyncAccount();
                 $credentials = $syncAccount->sync($formmattedCode, $urlStore);
 
+                $this->logger->info('Zenkipay - credentials => ' . json_encode($credentials));
+
                 if (isset($credentials['errorCode'])) {
                     throw new \Magento\Framework\Validator\Exception(__($credentials['humanMessage']));
                 }
 
                 // Se valida que la sincronización haya sido exitosa
-                if ($credentials['status'] != 'SYNCHRONIZED') {
-                    throw new \Magento\Framework\Validator\Exception(__('An unexpected error occurred synchronizing the account.'));
+                if ($credentials['status'] !== 'SYNCHRONIZED') {
+                    throw new \Magento\Framework\Validator\Exception(__('An unexpected error occurred synchronizing the account. Status ' . $credentials['status'] . '.'));
                 }
 
                 $this->deleteCredentials();
@@ -390,5 +394,19 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
         $this->api_key = $credentials['api_key'];
         $this->secret_key = $credentials['secret_key'];
         $this->webhook_signing_secret = $credentials['whsec'];
+    }
+
+    public function updateZenkiOrder($zenki_order_id, $data)
+    {
+        try {
+            $this->logger->info('Zenkipay - updateZenkiOrder => ' . json_encode($data));
+
+            $zenkipay = new \Zenkipay\Sdk($this->api_key, $this->secret_key);
+            $zenkipay->orders()->update($zenki_order_id, $data);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Zenkipay - updateZenkiOrder: ' . $e->getMessage());
+            return false;
+        }
     }
 }

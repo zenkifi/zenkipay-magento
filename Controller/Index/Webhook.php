@@ -134,6 +134,8 @@ class Webhook extends \Magento\Framework\App\Action\Action implements CsrfAwareA
             $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
             $invoice->register();
             $invoice->save();
+
+            $this->zenkipay->updateZenkiOrder($payment->zenkiOrderId, ['orderId' => $order->getId()]);
         } catch (\Exception $e) {
             header('HTTP/1.1 500 Internal Server Error');
             header('Content-type: application/json');

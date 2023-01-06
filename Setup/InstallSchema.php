@@ -6,18 +6,23 @@ use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\Setup\InstallSchemaInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
+use Psr\Log\LoggerInterface;
 
 class InstallSchema implements InstallSchemaInterface
 {
+    protected $logger;
+
+    public function __construct(LoggerInterface $logger_interface)
+    {
+        $this->logger = $logger_interface;
+    }
+
     public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
+        $this->logger->debug('#InstallSchema', ['version' => $context->getVersion()]);
+
         $installer = $setup;
-
         $installer->startSetup();
-
-        \Magento\Framework\App\ObjectManager::getInstance()
-            ->get('Psr\Log\LoggerInterface')
-            ->info('InstallSchema............');
 
         try {
             if (!$installer->tableExists('zenkipay_credentials')) {
@@ -37,16 +42,14 @@ class InstallSchema implements InstallSchemaInterface
                     ->addColumn('env', Table::TYPE_TEXT, 5, ['nullable' => false], 'Environment')
                     ->addColumn('created_at', Table::TYPE_TIMESTAMP, null, ['nullable' => false, 'default' => Table::TIMESTAMP_INIT])
                     ->addColumn('updated_at', Table::TYPE_TIMESTAMP, null, ['nullable' => false, 'default' => Table::TIMESTAMP_INIT_UPDATE])
-                    ->setComment('Zenkipay Credentials Table')
-                    ->setOption('type', 'InnoDB')
-                    ->setOption('charset', 'utf8_general_ci');
+                    ->setComment('Zenkipay Credentials Table');
+                // ->setOption('type', 'InnoDB')
+                // ->setOption('charset', 'utf8_general_ci');
 
                 $installer->getConnection()->createTable($table);
             }
-        } catch (Exception $err) {
-            \Magento\Framework\App\ObjectManager::getInstance()
-                ->get('Psr\Log\LoggerInterface')
-                ->info($err->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error('#InstallSchema' . $e->getMessage());
         }
 
         $installer->endSetup();
