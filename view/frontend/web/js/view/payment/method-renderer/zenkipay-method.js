@@ -59,6 +59,11 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
                             return;
                         }
 
+                        if (data.postMsgType === 'shopper_payment_confirmation') {
+                            self.placeOrder();
+                            return;
+                        }
+
                         if (data.postMsgType === 'done') {
                             self.placeOrder();
                             return;
