@@ -6,24 +6,15 @@
 -->
 <style>
     .payment-method-logo {
-        float: right;
-        height: 25px;
-    }
-    .zenkipay-title {
-        border-bottom: 1px solid #cccccc;
-        padding-bottom: 15px;
-        color: #533b7f;
-    }
-    .steps-text {
-        padding: 3px;
-        color: #7a7a7a;
+        height: 70px;
+        margin-bottom: 15px;
+        max-width: 100%;
     }
 </style>
 <div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
     <div class="payment-method-title field choice">
         <input type="radio" name="payment[method]" class="radio" data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()" />
         <label data-bind="attr: {'for': getCode()}" class="label"><span data-bind="text: getTitle()"></span></label>
-        <img src="https://s3.amazonaws.com/prod-cdn-cms.zenki.fi/zenkipay_tagline_8aa4fac0aa.svg" class="payment-method-logo" alt="Zenkipay" />
     </div>
     <div class="payment-method-content">
         <!-- ko foreach: getRegion('messages') -->
@@ -35,9 +26,8 @@
             <!--/ko-->
         </div>
 
-        <div class="zenkipay items check payable">
-            <h3 class="zenkipay-title">Pay with cryptos… any wallet, any coin!. Transaction 100% secured.</h3>
-            <p class="steps-text">Zenkipay's latest, most complete cryptocurrency payment processing solution. Accept any crypto coin with over 150 wallets around the world.</p>
+        <div class="zenkipay">
+            <img src="https://s3.amazonaws.com/prod-cdn-cms.zenki.fi/crypto_btn_34765ef7b2.png" class="payment-method-logo" alt="Zenkipay" />
         </div>
 
         <div class="checkout-agreements-block">
