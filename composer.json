@@ -16,12 +16,12 @@
             "email": "support@zenki.fi"
         }
     ],
-    "extra": {
-        "map": [
-            [
-                "*",
-                "Zenki/Zenkipay"
-            ]
-        ]
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Zenki\\Zenkipay\\": ""
+        }
     }
 }
