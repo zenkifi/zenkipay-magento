@@ -26,9 +26,14 @@
             <!--/ko-->
         </div>
 
-        <div class="zenkipay">
-            <img src="https://s3.amazonaws.com/prod-cdn-cms.zenki.fi/crypto_btn_34765ef7b2.png" class="payment-method-logo" alt="Zenkipay" />
-        </div>
+        <form id="zenkipay_form" class="form" data-bind="attr: {'id': getCode() + '-form'}">
+            <input type="hidden" id="zenki_order_id" name="zenki_order_id" value="" />
+            <input type="hidden" id="trx_hash" name="trx_hash" value="" />
+            <input type="hidden" id="trx_explorer_url" name="trx_explorer_url" value="" />
+            <div class="zenkipay">
+                <img src="https://s3.amazonaws.com/prod-cdn-cms.zenki.fi/crypto_btn_34765ef7b2.png" class="payment-method-logo" alt="Zenkipay" />
+            </div>
+        </form>
 
         <div class="checkout-agreements-block">
             <!-- ko foreach: $parent.getRegion('before-place-order') -->

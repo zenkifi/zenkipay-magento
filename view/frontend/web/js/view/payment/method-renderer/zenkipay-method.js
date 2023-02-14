@@ -45,11 +45,9 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
                         orderId: response.zenki_order_id,
                     };
 
-                    zenkipay.openModal(purchaseOptions, function (error, data) {
-                        console.log('handleZenkipayEvents error => ', error);
-                        console.log('handleZenkipayEvents data => ', data);
-                        console.log('handleZenkipayEvents previousMsgType => ', previousMsgType);
+                    $('#zenki_order_id').val(response.zenki_order_id);
 
+                    zenkipay.openModal(purchaseOptions, function (error, data) {
                         if (error) {
                             self.messageContainer.addErrorMessage({
                                 message: error,
@@ -69,6 +67,11 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
                             return;
                         }
 
+                        if (data.postMsgType === 'processing_payment' && data.transaction) {
+                            $('#trx_hash').val(data.transaction.transactionHash);
+                            $('#trx_explorer_url').val(data.transaction.transactionExplorerUrl);
+                        }
+
                         if ((previousMsgType === 'processing_payment' || previousMsgType === 'done') && data.isCompleted) {
                             self.placeOrder();
                         }
@@ -83,6 +86,19 @@ define(['Magento_Checkout/js/view/payment/default', 'jquery', 'Magento_Checkout/
                     });
                 }
             });
+        },
+        /**
+         * @override
+         */
+        getData: function () {
+            return {
+                method: 'zenki_zenkipay',
+                additional_data: {
+                    zenki_order_id: $('#zenki_order_id').val(),
+                    trx_hash: $('#trx_hash').val(),
+                    trx_explorer_url: $('#trx_explorer_url').val(),
+                },
+            };
         },
     });
 });

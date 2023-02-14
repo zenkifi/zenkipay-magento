@@ -1,6 +1,6 @@
 # Zenkipay-Magento2
 
-Zenkipay payment extension for Magento2 (v0.3.3)
+Zenkipay payment extension for Magento2
 
 ## PREREQUISITES
 

@@ -110,6 +110,27 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     }
 
     /**
+     * Assign corresponding data
+     *
+     * @param \Magento\Framework\DataObject|mixed $data
+     * @return $this
+     * @throws LocalizedException
+     */
+    public function assignData(\Magento\Framework\DataObject $data)
+    {
+        parent::assignData($data);
+
+        $infoInstance = $this->getInfoInstance();
+        $additionalData = $data->getData('additional_data') != null ? $data->getData('additional_data') : $data->getData();
+
+        $infoInstance->setAdditionalInformation('zenki_order_id', isset($additionalData['zenki_order_id']) ? $additionalData['zenki_order_id'] : null);
+        $infoInstance->setAdditionalInformation('trx_hash', isset($additionalData['trx_hash']) ? $additionalData['trx_hash'] : null);
+        $infoInstance->setAdditionalInformation('trx_explorer_url', isset($additionalData['trx_explorer_url']) ? $additionalData['trx_explorer_url'] : null);
+
+        return $this;
+    }
+
+    /**
      * Order payment abstract method
      *
      * @param \Magento\Framework\DataObject|InfoInterface $payment
@@ -121,11 +142,13 @@ class Zenkipay extends \Magento\Payment\Model\Method\AbstractMethod
     {
         /** @var \Magento\Sales\Model\Order $order */
         $order = $payment->getOrder();
+        $zenkiOrderId = $this->getInfoInstance()->getAdditionalInformation('zenki_order_id');
 
         try {
             // Actualiza el estado de la orden
             $state = \Magento\Sales\Model\Order::STATE_NEW;
             $order->setState($state)->setStatus($state);
+            $order->setExtOrderId($zenkiOrderId);
             $order->save();
         } catch (\Exception $e) {
             $this->debugData(['exception' => $e->getMessage()]);

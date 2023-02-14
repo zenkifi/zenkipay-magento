@@ -7,7 +7,7 @@
     "require": {
         "php-http/curl-client": "^2.2",
         "svix/svix": "^0.63.1",
-        "zenki/zenkipay": "~0.5"
+        "zenki/zenkipay": "~0.6"
     },
     "authors": [
         {

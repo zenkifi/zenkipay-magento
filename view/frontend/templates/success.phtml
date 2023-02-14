@@ -6,15 +6,9 @@
  */
 ?>
 
-<?php $zenkipay = $block->getPurchaseOptions(); ?>
+<?php $zenkipay = $block->getTransactionHash(); ?>
 
-<script type="text/x-magento-init">
-    {
-        "*": {
-            "Zenki_Zenkipay/js/modal": {
-                "zenki_order_id": "<?php echo $zenkipay['zenki_order_id']; ?>",
-                "payment_signature": "<?php echo $zenkipay['payment_signature']; ?>"
-            }
-        }
-    }
-</script>
+<div class="checkout-success">
+    <h2>ZENKIPAY DETAILS</h2>
+    <p><?php echo __('Transaction hash: '); ?><a href="<?php echo $block->escapeHtml($zenkipay['trx_explorer_url']); ?>" target="_blank"><?php echo $block->escapeHtml($zenkipay['trx_hash']); ?></a></p>
+</div>

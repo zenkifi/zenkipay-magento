@@ -51,108 +51,20 @@ class Success extends \Magento\Checkout\Block\Onepage\Success
         $this->productRepository = $productRepository;
     }
 
-    public function getPurchaseOptions()
+    public function getTransactionHash()
     {
-        $zenkipay = new \Zenkipay\Sdk($this->payment->getApiKey(), $this->payment->getSecretKey());
-
         $incrementId = $this->_checkoutSession->getLastRealOrder()->getIncrementId();
         $order = $this->orderItemsDetails->loadByIncrementId($incrementId);
-        $items = [];
-        $items_types = [];
+        $zenkiOrderId = $order->getExtOrderId();
 
-        foreach ($order->getAllVisibleItems() as $item) {
-            // Existe diferentes tipos de producto, sin embargo solo se consideran 2 para ser SERVICE.
-            // Tipos: configurable, simple, grouped, virtual, downloadable, bundle.
-            $product = $this->getProductById($item->getProductId());
-            $item_type = $product->getTypeId() == 'virtual' || $product->getTypeId() == 'downloadable' ? 'WITHOUT_CARRIER' : 'WITH_CARRIER';
-            array_push($items_types, $item_type);
+        $zenkipay = new \Zenkipay\Sdk($this->payment->getApiKey(), $this->payment->getSecretKey());
+        $zenkipay_order = $zenkipay->orders()->find($zenkiOrderId);
 
-            $items[] = [
-                'externalId' => $item->getProductId(),
-                'name' => $item->getName(),
-                'quantity' => (int) $item->getQtyOrdered(),
-                'unitPrice' => round($item->getPrice(), 2), // without taxes
-                'type' => $item_type,
-            ];
-        }
-
-        $totalItemsAmount = $order->getSubtotal();
-        $shipmentAmount = $order->getShippingAmount();
-        $subtotalAmount = $shipmentAmount + $totalItemsAmount;
-
-        $purchase_data = [
-            'version' => $this->purchase_data_version,
-            'type' => $this->getOrderType($items_types),
-            'orderId' => $order->getId(),
-            'shopper' => [
-                'email' => $order->getCustomerEmail(),
-            ],
-            'items' => $items,
-            'breakdown' => [
-                'currencyCodeIso3' => $order->getOrderCurrencyCode(),
-                'totalItemsAmount' => round($totalItemsAmount, 2), // without taxes
-                'shipmentAmount' => round($shipmentAmount, 2), // without taxes
-                'subtotalAmount' => round($subtotalAmount, 2), // without taxes
-                'taxesAmount' => round($order->getTaxAmount(), 2),
-                'localTaxesAmount' => 0,
-                'importCosts' => 0,
-                'discountAmount' => abs(round($order->getDiscountAmount(), 2)),
-                'grandtotalAmount' => round($order->getBaseGrandTotal(), 2),
-            ],
-        ];
-
-        $this->logger->debug('purchase_data ====> ' . json_encode($purchase_data));
-        $zenkipay_order = $zenkipay->orders()->create($purchase_data);
-        $this->logger->debug('zenkipay_order ====> ' . json_encode($zenkipay_order));
+        $this->logger->debug('getTransactionHash ====> ' . json_encode($zenkipay_order));
 
         return [
-            'zenki_order_id' => $zenkipay_order->zenkiOrderId,
-            'payment_signature' => $zenkipay_order->paymentSignature,
+            'trx_hash' => $zenkipay_order->paymentInfo->cryptoPayment->transactionHash,
+            'trx_explorer_url' => $zenkipay_order->paymentInfo->cryptoPayment->networkScanUrl,
         ];
-    }
-
-    /**
-     * Retrieve product by id
-     *
-     * @param int $productId
-     * @return \Magento\Catalog\Api\Data\ProductInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function getProductById($productId)
-    {
-        return $this->productRepository->getById($productId);
-    }
-
-    /**
-     * Generates payload signature using the RSA private key
-     *
-     * @param string $payload Purchase data
-     *
-     * @return string
-     */
-    protected function generateSignature($payload)
-    {
-        $rsa_private_key = openssl_pkey_get_private($this->payment->getRsaPrivateKey());
-        openssl_sign($payload, $signature, $rsa_private_key, 'RSA-SHA256');
-        return base64_encode($signature);
-    }
-
-    /**
-     * Get service type
-     *
-     * @param array $items_types
-     *
-     * @return string
-     */
-    protected function getOrderType($items_types)
-    {
-        $needles = ['WITH_CARRIER', 'WITHOUT_CARRIER'];
-        if (empty(array_diff($needles, $items_types))) {
-            return 'MIXED';
-        } elseif (in_array('WITH_CARRIER', $items_types)) {
-            return 'WITH_CARRIER';
-        } else {
-            return 'WITHOUT_CARRIER';
-        }
     }
 }
